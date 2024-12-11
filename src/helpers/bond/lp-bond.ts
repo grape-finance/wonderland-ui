@@ -1,4 +1,4 @@
-import { BigNumber, ContractInterface } from "ethers";
+import { ContractInterface } from "ethers";
 import { Bond, BondOpts } from "./bond";
 import { BondType } from "./constants";
 import { Networks } from "../../constants/blockchain";
@@ -10,8 +10,6 @@ import { getAddresses } from "../../constants/addresses";
 export interface LPBondOpts extends BondOpts {
     readonly reserveContractAbi: ContractInterface;
     readonly lpUrl: string;
-    readonly tokensInStrategy?: string;
-    readonly tokensInStrategyReserve?: string;
 }
 
 export class LPBond extends Bond {
@@ -19,8 +17,6 @@ export class LPBond extends Bond {
     readonly lpUrl: string;
     readonly reserveContractAbi: ContractInterface;
     readonly displayUnits: string;
-    readonly tokensInStrategy?: string;
-    readonly tokensInStrategyReserve?: string;
 
     constructor(lpBondOpts: LPBondOpts) {
         super(BondType.LP, lpBondOpts);
@@ -28,8 +24,6 @@ export class LPBond extends Bond {
         this.lpUrl = lpBondOpts.lpUrl;
         this.reserveContractAbi = lpBondOpts.reserveContractAbi;
         this.displayUnits = "LP";
-        this.tokensInStrategy = lpBondOpts.tokensInStrategy;
-        this.tokensInStrategyReserve = lpBondOpts.tokensInStrategyReserve;
     }
 
     async getTreasuryBalance(networkID: Networks, provider: StaticJsonRpcProvider) {
@@ -38,15 +32,36 @@ export class LPBond extends Bond {
         const token = this.getContractForReserve(networkID, provider);
         const tokenAddress = this.getAddressForReserve(networkID);
         const bondCalculator = getBondCalculator(networkID, provider);
-        let tokenAmount = await token.balanceOf(addresses.TREASURY_ADDRESS);
-        if (this.tokensInStrategy) {
-            tokenAmount = BigNumber.from(tokenAmount).add(BigNumber.from(this.tokensInStrategy)).toString();
-        }
+        const tokenAmount = await token.balanceOf(addresses.TREASURY_ADDRESS);
         const valuation = await bondCalculator.valuation(tokenAddress, tokenAmount);
         const markdown = await bondCalculator.markdown(tokenAddress);
         const tokenUSD = (valuation / Math.pow(10, 9)) * (markdown / Math.pow(10, 18));
 
         return tokenUSD;
+    }
+
+    public getTokenAmount(networkID: Networks, provider: StaticJsonRpcProvider) {
+        return this.getReserves(networkID, provider, true);
+    }
+
+    public getTimeAmount(networkID: Networks, provider: StaticJsonRpcProvider) {
+        return this.getReserves(networkID, provider, false);
+    }
+
+    private async getReserves(networkID: Networks, provider: StaticJsonRpcProvider, isToken: boolean): Promise<number> {
+        const addresses = getAddresses(networkID);
+
+        const token = this.getContractForReserve(networkID, provider);
+
+        let [reserve0, reserve1] = await token.getReserves();
+        const token1: string = await token.token1();
+        const isTime = token1.toLowerCase() === addresses.TIME_ADDRESS.toLowerCase();
+
+        return isToken ? this.toTokenDecimal(false, isTime ? reserve0 : reserve1) : this.toTokenDecimal(true, isTime ? reserve1 : reserve0);
+    }
+
+    private toTokenDecimal(isTime: boolean, reserve: number) {
+        return isTime ? reserve / Math.pow(10, 9) : reserve / Math.pow(10, 18);
     }
 }
 
@@ -54,8 +69,6 @@ export class LPBond extends Bond {
 export interface CustomLPBondOpts extends LPBondOpts {}
 
 export class CustomLPBond extends LPBond {
-    readonly customToken = true;
-
     constructor(customBondOpts: CustomLPBondOpts) {
         super(customBondOpts);
 
@@ -65,20 +78,10 @@ export class CustomLPBond extends LPBond {
 
             return tokenAmount * tokenPrice;
         };
-    }
-}
 
-export interface NotTimeLpBondOpts extends LPBondOpts {
-    tokenPriceFun: (networkID: Networks, provider: StaticJsonRpcProvider) => Promise<number>;
-}
-
-export class NotTimeLpBond extends LPBond {
-    constructor(customBondOpts: NotTimeLpBondOpts) {
-        super(customBondOpts);
-
-        this.getTreasuryBalance = async (networkID: Networks, provider: StaticJsonRpcProvider) => {
-            const tokenAmount = await super.getTreasuryBalance(networkID, provider);
-            const tokenPrice = await customBondOpts.tokenPriceFun(networkID, provider);
+        this.getTokenAmount = async (networkID: Networks, provider: StaticJsonRpcProvider) => {
+            const tokenAmount = await super.getTokenAmount(networkID, provider);
+            const tokenPrice = this.getTokenPrice();
 
             return tokenAmount * tokenPrice;
         };

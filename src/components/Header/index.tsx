@@ -7,9 +7,6 @@ import ConnectButton from "./connect-button";
 import WrapButton from "./wrap-button";
 import "./header.scss";
 import { DRAWER_WIDTH, TRANSITION_DURATION } from "../../constants/style";
-import { useWeb3Context } from "../../hooks";
-import { Networks } from "../../constants/blockchain";
-import NetworkMenu from "./network-menu";
 
 interface IHeader {
     handleDrawerToggle: () => void;
@@ -46,9 +43,8 @@ const useStyles = makeStyles(theme => ({
 
 function Header({ handleDrawerToggle, drawe }: IHeader) {
     const classes = useStyles();
-    const isVerySmallScreen = useMediaQuery("(max-width: 548px)");
-    const isWrapShow = useMediaQuery("(max-width: 710px)");
-    const { chainID } = useWeb3Context();
+    const isVerySmallScreen = useMediaQuery("(max-width: 400px)");
+    const isWrapShow = useMediaQuery("(max-width: 480px)");
 
     return (
         <div className={`${classes.topBar} ${!drawe && classes.topBarShift}`}>
@@ -58,9 +54,8 @@ function Header({ handleDrawerToggle, drawe }: IHeader) {
                         <img src={MenuIcon} alt="" />
                     </div>
                     <div className="dapp-topbar-btns-wrap">
-                        {!isWrapShow && chainID === Networks.AVAX && <TimeMenu />}
-                        {chainID === Networks.AVAX && <WrapButton />}
-                        {!isVerySmallScreen && <NetworkMenu />}
+                        {!isVerySmallScreen && <TimeMenu />}
+                        {!isWrapShow && <WrapButton />}
                         <ConnectButton />
                     </div>
                 </Toolbar>

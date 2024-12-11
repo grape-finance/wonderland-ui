@@ -1,40 +1,52 @@
 import { Networks } from "../constants/blockchain";
-import { getChainInfo } from "../helpers/get-chains";
 
-const switchRequest = (chain: Networks) => {
-    const info = getChainInfo(chain);
+const switchRequest = () => {
     return window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: info.chainId }],
+        // params: [{ chainId: "0xa86a" }],
+        params: [{ chainId: "0x14A34" }],
     });
 };
 
-const addChainRequest = (chain: Networks) => {
-    const { chainId, chainName, rpcUrls, blockExplorerUrls, nativeCurrency } = getChainInfo(chain);
-
+const addChainRequest = () => {
     return window.ethereum.request({
         method: "wallet_addEthereumChain",
         params: [
+            // {
+            //     chainId: "0xa86a",
+            //     chainName: "Avalanche Mainnet",
+            //     rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
+            //     blockExplorerUrls: ["https://cchain.explorer.avax.network/"],
+            //     nativeCurrency: {
+            //         name: "AVAX",
+            //         symbol: "AVAX",
+            //         decimals: 18,
+            //     },
+            // },
             {
-                chainId,
-                chainName,
-                rpcUrls,
-                blockExplorerUrls,
-                nativeCurrency,
+                chainId: "0x14A34",
+                chainName: "Base Sepolia",
+                rpcUrls: ["https://sepolia.base.org"],
+                blockExplorerUrls: ["https://sepolia.basescan.org/"],
+                nativeCurrency: {
+                    name: "ETH",
+                    symbol: "ETH",
+                    decimals: 18,
+                },
             },
         ],
     });
 };
 
-export const swithNetwork = async (chain = Networks.AVAX) => {
+export const swithNetwork = async () => {
     if (window.ethereum) {
         try {
-            await switchRequest(chain);
+            await switchRequest();
         } catch (error: any) {
             if (error.code === 4902) {
                 try {
-                    await addChainRequest(chain);
-                    await switchRequest(chain);
+                    await addChainRequest();
+                    await switchRequest();
                 } catch (addError) {
                     console.log(error);
                 }

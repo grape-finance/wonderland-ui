@@ -7,11 +7,6 @@ import MobileDrawer from "../Drawer/mobile-drawer";
 import Drawer from "../Drawer";
 import { cubesImage } from "src/constants/img";
 import Messages from "../Messages";
-import LiquidityBanner from "../LiquidityBanner";
-import InfoBanner from "../InfoBanner";
-import AirdropBanner from "../AirdropBanner";
-import { useWeb3Context } from "../../hooks";
-import { Networks } from "../../constants/blockchain";
 
 interface IViewBaseProps {
     children: React.ReactNode;
@@ -55,8 +50,6 @@ function ViewBase({ children }: IViewBaseProps) {
         setMobileOpen(!mobileOpen);
     };
 
-    const { chainID } = useWeb3Context();
-
     return (
         <div className="view-base-root">
             <Messages />
@@ -80,9 +73,6 @@ function ViewBase({ children }: IViewBaseProps) {
                         <p>{cubesImage}</p>
                     </div>
                 )}
-                {/* {chainID === Networks.AVAX && <LiquidityBanner />} */}
-                {chainID === Networks.AVAX && <AirdropBanner />}
-                {chainID === Networks.AVAX && <InfoBanner />}
                 {children}
             </div>
         </div>

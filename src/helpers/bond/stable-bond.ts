@@ -1,4 +1,4 @@
-import { ContractInterface, ethers } from "ethers";
+import { ContractInterface } from "ethers";
 import { Bond, BondOpts } from "./bond";
 import { BondType } from "./constants";
 import { Networks } from "../../constants/blockchain";
@@ -30,10 +30,20 @@ export class StableBond extends Bond {
         const addresses = getAddresses(networkID);
         const token = this.getContractForReserve(networkID, provider);
         let tokenAmount = await token.balanceOf(addresses.TREASURY_ADDRESS);
+        console.log("tokenAmount", tokenAmount);
+        console.log("this.tokensInStrategy", this.tokensInStrategy);
         if (this.tokensInStrategy) {
             tokenAmount = BigNumber.from(tokenAmount).add(BigNumber.from(this.tokensInStrategy)).toString();
         }
         return tokenAmount / Math.pow(10, 18);
+    }
+
+    public async getTokenAmount(networkID: Networks, provider: StaticJsonRpcProvider) {
+        return this.getTreasuryBalance(networkID, provider);
+    }
+
+    public getTimeAmount(networkID: Networks, provider: StaticJsonRpcProvider) {
+        return new Promise<number>(reserve => reserve(0));
     }
 }
 
@@ -41,8 +51,6 @@ export class StableBond extends Bond {
 export interface CustomBondOpts extends StableBondOpts {}
 
 export class CustomBond extends StableBond {
-    readonly customToken = true;
-
     constructor(customBondOpts: CustomBondOpts) {
         super(customBondOpts);
 
@@ -52,25 +60,5 @@ export class CustomBond extends StableBond {
 
             return tokenAmount * tokenPrice;
         };
-    }
-}
-
-export class StableV2Bond extends Bond {
-    readonly isLP = false;
-    readonly reserveContractAbi: ContractInterface;
-    readonly displayUnits: string;
-
-    constructor(stableBondOpts: StableBondOpts) {
-        super(BondType.StableAsset, stableBondOpts);
-
-        this.displayUnits = stableBondOpts.displayName;
-        this.reserveContractAbi = stableBondOpts.reserveContractAbi;
-    }
-
-    public async getTreasuryBalance(networkID: Networks, provider: StaticJsonRpcProvider) {
-        const bondContract = this.getContractForBond(networkID, provider);
-        const purchased = await bondContract.totalPrincipalBonded();
-
-        return Number(ethers.utils.formatEther(purchased));
     }
 }

@@ -164,15 +164,6 @@
   .bond-input-wrap{
     min-width: 50%;
     max-width: 408px;
-    margin-bottom: 20px;
-
-    .bond-input-error{
-      margin-top: 5px;
-      font-family: Montserrat Light;
-      font-weight: 300;
-      font-size: 14px;
-      color: rgb(255, 0, 0);
-    }
   }
 
   .bond-input {
@@ -180,6 +171,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     outline: none;
+    margin-bottom: 20px;
 
     .MuiOutlinedInput-input {
       font-family: Montserrat Medium;
@@ -243,9 +235,6 @@
     font-weight: 500;
     font-size: 14px;
     color: #FFFFFF;
-  }
-  .bond-balance-title.grey{
-    color: rgba(255, 255, 255, 0.6) !important;
   }
 }
 

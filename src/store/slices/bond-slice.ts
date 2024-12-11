@@ -1,5 +1,5 @@
 import { ethers, constants } from "ethers";
-import { getMarketPrice, getTokenPrice, sleep, trim } from "../../helpers";
+import { getMarketPrice, getTokenPrice } from "../../helpers";
 import { calculateUserBondDetails, getBalances } from "./account-slice";
 import { getAddresses } from "../../constants";
 import { fetchPendingTxns, clearPendingTxn } from "./pending-txns-slice";
@@ -10,13 +10,13 @@ import { Bond } from "../../helpers/bond/bond";
 import { Networks } from "../../constants/blockchain";
 import { getBondCalculator } from "../../helpers/bond-calculator";
 import { RootState } from "../store";
-import { avaxTime, wmemoMim } from "../../helpers/bond";
+import { avaxTime, wavax } from "../../helpers/bond";
 import { error, warning, success, info } from "../slices/messages-slice";
 import { messages } from "../../constants/messages";
 import { getGasPrice } from "../../helpers/get-gas-price";
 import { metamaskErrorWrap } from "../../helpers/metamask-error-wrap";
+import { sleep } from "../../helpers";
 import { BigNumber } from "ethers";
-import { CustomTreasuryContract, wMemoTokenContract } from "../../abi";
 
 interface IChangeApproval {
     bond: Bond;
@@ -84,15 +84,12 @@ export interface IBondDetails {
     bond: string;
     bondDiscount: number;
     bondQuote: number;
-    bondQuoteWrapped?: number;
     purchased: number;
     vestingTerm: number;
     maxBondPrice: number;
-    maxBondPriceWrapped?: number;
     bondPrice: number;
     marketPrice: number;
     maxBondPriceToken: number;
-    soldOut?: boolean;
 }
 
 export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async ({ bond, value, provider, networkID }: ICalcBondDetails, { dispatch }) => {
@@ -105,24 +102,17 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
     let bondPrice = 0,
         bondDiscount = 0,
         valuation = 0,
-        bondQuote = 0,
-        bondQuoteWrapped = 0;
+        bondQuote = 0;
 
     const addresses = getAddresses(networkID);
 
     const bondContract = bond.getContractForBond(networkID, provider);
     const bondCalcContract = getBondCalculator(networkID, provider);
-    const wMemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
 
     const terms = await bondContract.terms();
-    let maxBondPrice = await bondContract.maxPayout();
-    const maxBondPriceWrapped = (await wMemoContract.MEMOTowMEMO(maxBondPrice)) / Math.pow(10, 18);
+    const maxBondPrice = (await bondContract.maxPayout()) / Math.pow(10, 9);
 
-    maxBondPrice = maxBondPrice / Math.pow(10, 9);
-
-    const { timePrice, wMemoPrice } = await getMarketPrice();
-
-    let marketPrice = timePrice * Math.pow(10, 9);
+    let marketPrice = await getMarketPrice(networkID, provider);
 
     const mimPrice = getTokenPrice("MIM");
     marketPrice = (marketPrice / Math.pow(10, 9)) * mimPrice;
@@ -144,28 +134,22 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
     const maxBodValue = ethers.utils.parseEther("1");
 
     if (bond.isLP) {
-        if (!bond.deprecated) {
-            valuation = await bondCalcContract.valuation(bond.getAddressForReserve(networkID), amountInWei);
-            bondQuote = await bondContract.payoutFor(valuation);
-            bondQuoteWrapped = (await wMemoContract.MEMOTowMEMO(bondQuote)) / Math.pow(10, 18);
-            bondQuote = bondQuote / Math.pow(10, 9);
+        valuation = await bondCalcContract.valuation(bond.getAddressForReserve(networkID), amountInWei);
+        bondQuote = await bondContract.payoutFor(valuation);
+        bondQuote = bondQuote / Math.pow(10, 9);
 
-            const maxValuation = await bondCalcContract.valuation(bond.getAddressForReserve(networkID), maxBodValue);
-            const maxBondQuote = await bondContract.payoutFor(maxValuation);
-            maxBondPriceToken = maxBondPrice / (maxBondQuote * Math.pow(10, -9));
-        }
+        const maxValuation = await bondCalcContract.valuation(bond.getAddressForReserve(networkID), maxBodValue);
+        const maxBondQuote = await bondContract.payoutFor(maxValuation);
+        maxBondPriceToken = maxBondPrice / (maxBondQuote * Math.pow(10, -9));
     } else {
-        if (!bond.deprecated) {
-            bondQuote = await bondContract.payoutFor(amountInWei);
-            bondQuoteWrapped = (await wMemoContract.MEMOTowMEMO(parseInt(trim(bondQuote / Math.pow(10, 9), 0)))) / Math.pow(10, 18);
-            bondQuote = bondQuote / Math.pow(10, 18);
+        bondQuote = await bondContract.payoutFor(amountInWei);
+        bondQuote = bondQuote / Math.pow(10, 18);
 
-            const maxBondQuote = await bondContract.payoutFor(maxBodValue);
-            maxBondPriceToken = maxBondPrice / (maxBondQuote * Math.pow(10, -18));
-        }
+        const maxBondQuote = await bondContract.payoutFor(maxBodValue);
+        maxBondPriceToken = maxBondPrice / (maxBondQuote * Math.pow(10, -18));
     }
 
-    if (!!value && bondQuote > maxBondPrice && !bond.deprecated) {
+    if (!!value && bondQuote > maxBondPrice) {
         dispatch(error({ text: messages.try_mint_more(maxBondPrice.toFixed(2).toString()) }));
     }
 
@@ -173,30 +157,26 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
     const token = bond.getContractForReserve(networkID, provider);
     let purchased = await token.balanceOf(addresses.TREASURY_ADDRESS);
 
-    if (bond.tokensInStrategy) {
-        purchased = BigNumber.from(purchased).add(BigNumber.from(bond.tokensInStrategy)).toString();
-    }
-
     if (bond.isLP) {
         const assetAddress = bond.getAddressForReserve(networkID);
         const markdown = await bondCalcContract.markdown(assetAddress);
+
         purchased = await bondCalcContract.valuation(assetAddress, purchased);
         purchased = (markdown / Math.pow(10, 18)) * (purchased / Math.pow(10, 9));
 
-        if (bond.customToken) {
-            const tokenPrice = getTokenPrice(bond.bondToken);
-            purchased = purchased * tokenPrice;
-        }
-
-        if (bond.name === wmemoMim.name) {
-            purchased = purchased * wMemoPrice * mimPrice;
+        if (bond.name === avaxTime.name) {
+            const avaxPrice = getTokenPrice("AVAX");
+            purchased = purchased * avaxPrice;
         }
     } else {
+        if (bond.tokensInStrategy) {
+            purchased = BigNumber.from(purchased).add(BigNumber.from(bond.tokensInStrategy)).toString();
+        }
         purchased = purchased / Math.pow(10, 18);
 
-        if (bond.customToken) {
-            const tokenPrice = getTokenPrice(bond.bondToken);
-            purchased = purchased * tokenPrice;
+        if (bond.name === wavax.name) {
+            const avaxPrice = getTokenPrice("AVAX");
+            purchased = purchased * avaxPrice;
         }
     }
 
@@ -210,81 +190,6 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
         bondPrice: bondPrice / Math.pow(10, 18),
         marketPrice,
         maxBondPriceToken,
-        bondQuoteWrapped,
-        maxBondPriceWrapped,
-    };
-});
-
-async function calcPayoutFor(value: string, customTreasury: ethers.Contract, bondContract: ethers.Contract) {
-    const token = await bondContract.principalToken();
-    const tokensValue = await customTreasury.valueOfToken(token, value);
-    const payoutFor = await bondContract.payoutFor(tokensValue);
-    return payoutFor / Math.pow(10, 18);
-}
-
-export const calcBondV2Details = createAsyncThunk("bonding/calcBondV2Details", async ({ bond, value, provider, networkID }: ICalcBondDetails, { dispatch }) => {
-    if (!value) {
-        value = "0";
-    }
-    const amountInWei = ethers.utils.parseEther(value);
-
-    let bondPrice = 0,
-        bondDiscount = 0,
-        bondQuote = 0,
-        maxBondPriceToken = 0;
-
-    const addresses = getAddresses(networkID);
-
-    const bondContract = bond.getContractForBond(networkID, provider);
-    const customTreasury = new ethers.Contract(addresses.TREASURY_ADDRESS, CustomTreasuryContract, provider);
-
-    const terms = await bondContract.terms();
-    let maxBondPrice = (await bondContract.maxPayout()) / Math.pow(10, 18);
-
-    const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
-    const treasutyBalance = (await wmemoContract.balanceOf(addresses.TREASURY_ADDRESS)) / Math.pow(10, 18);
-
-    maxBondPrice = treasutyBalance > maxBondPrice ? maxBondPrice : treasutyBalance;
-
-    let { wMemoPrice } = await getMarketPrice();
-
-    const mimPrice = getTokenPrice("MIM");
-
-    const maxBodValue = ethers.utils.parseEther("1");
-    const bondValue = ethers.utils.parseEther("1000");
-
-    try {
-        if (!bond.deprecated) {
-            bondQuote = await calcPayoutFor(amountInWei.toString(), customTreasury, bondContract);
-
-            const payoutForMax = await calcPayoutFor(maxBodValue.toString(), customTreasury, bondContract);
-            maxBondPriceToken = maxBondPrice / payoutForMax;
-        }
-
-        bondPrice = (await bondContract.bondPrice()) / Math.pow(10, 7);
-        const stablePayoutFor = await calcPayoutFor(bondValue.toString(), customTreasury, bondContract);
-        const payoutForUsd = stablePayoutFor * wMemoPrice;
-        bondDiscount = (payoutForUsd - 1000) / 1000;
-    } catch (e) {
-        console.log("error getting bondPriceInUSD", e);
-    }
-
-    let purchased = await bondContract.totalPrincipalBonded();
-    purchased = Number(ethers.utils.formatEther(purchased)) * mimPrice;
-
-    const soldOut = treasutyBalance < 0.00001;
-
-    return {
-        bond: bond.name,
-        bondDiscount,
-        bondPrice,
-        purchased,
-        bondQuote,
-        vestingTerm: Number(terms.vestingTerm),
-        maxBondPrice,
-        marketPrice: wMemoPrice,
-        maxBondPriceToken,
-        soldOut,
     };
 });
 
@@ -360,12 +265,7 @@ export const redeemBond = createAsyncThunk("bonding/redeemBond", async ({ addres
     try {
         const gasPrice = await getGasPrice(provider);
 
-        if (bond.v2Bond) {
-            redeemTx = await bondContract.redeem(address, { gasPrice });
-        } else {
-            redeemTx = await bondContract.redeem(address, autostake === true, { gasPrice });
-        }
-
+        redeemTx = await bondContract.redeem(address, autostake === true, { gasPrice });
         const pendingTxnType = "redeem_bond_" + bond.name + (autostake === true ? "_autostake" : "");
         dispatch(
             fetchPendingTxns({
@@ -426,17 +326,6 @@ const bondingSlice = createSlice({
                 state.loading = false;
             })
             .addCase(calcBondDetails.rejected, (state, { error }) => {
-                state.loading = false;
-                console.log(error);
-            })
-            .addCase(calcBondV2Details.pending, state => {
-                state.loading = true;
-            })
-            .addCase(calcBondV2Details.fulfilled, (state, action) => {
-                setBondState(state, action.payload);
-                state.loading = false;
-            })
-            .addCase(calcBondV2Details.rejected, (state, { error }) => {
                 state.loading = false;
                 console.log(error);
             });

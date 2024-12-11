@@ -57,13 +57,13 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
     const [loading, setLoading] = useState(false);
 
     const hasAllowance = useCallback(() => {
-        return bond.isLP ? token.allowanceLp > 0 : token.allowance > 0;
-    }, [token.allowance, token.allowanceLp]);
+        return token.allowance > 0;
+    }, [token.allowance]);
 
     const onSeekApproval = async () => {
         if (await checkWrongNetwork()) return;
 
-        dispatch(changeApproval({ address, token, provider, networkID: chainID, bond }));
+        dispatch(changeApproval({ address, token, provider, networkID: chainID }));
     };
 
     const onMint = async () => {
@@ -80,8 +80,10 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
                 bond,
                 token,
                 value: quantity,
+                minReturnAmount: swapInfo.amount,
                 swapTarget: swapInfo.swapTarget,
                 swapData: swapInfo.swapData,
+                slippage,
                 address,
             }),
         );
@@ -111,7 +113,7 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
             setSwapInfo({ swapData: "", swapTarget: "", amount: "", value: "0" });
             setLoading(true);
             timeount = setTimeout(async () => {
-                const info = await calcZapinDetails({ token, provider, networkID: chainID, bond, value: quantity, slippage, dispatch, address });
+                const info = await calcZapinDetails({ token, provider, networkID: chainID, bond, value: quantity, slippage, dispatch });
                 if (info.amount) {
                     const amount = utils.formatEther(info.amount);
                     dispatch(calcBondDetails({ bond, value: amount, provider, networkID: chainID }));
@@ -131,7 +133,7 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
 
     useEffect(() => {
         setTimeout(async () => {
-            const { amount } = await calcZapinDetails({ token, provider, networkID: chainID, bond, value: "1", slippage, dispatch, address });
+            const { amount } = await calcZapinDetails({ token, provider, networkID: chainID, bond, value: "1", slippage, dispatch });
             if (amount) {
                 const amountValue = utils.formatEther(amount);
                 setPriceToken(Number(amountValue));
@@ -185,7 +187,7 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
                 <Box className="card-content">
                     <div className="zapin-header">
                         <div className="zapin-header-token-select-wrap">
-                            <p className="zapin-header-token-select-title">Zapin</p>
+                            <p className="zapin-header-token-select-title">Zapin & Mint</p>
                             <OutlinedInput
                                 type="number"
                                 placeholder="Amount"
@@ -220,7 +222,7 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
                                         await onMint();
                                     }}
                                 >
-                                    <p>{txnButtonText(pendingTransactions, "zapin_" + token.name + "_" + bond.name, "Zap")}</p>
+                                    <p>{txnButtonText(pendingTransactions, "zapin_" + token.name + "_" + bond.name, "Mint")}</p>
                                 </div>
                             ) : (
                                 <div
@@ -263,8 +265,24 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
                                 <p className="data-row-value">{`${trim(token.balance, 6)} ${token.name}`}</p>
                             </div>
                             <div className="data-row">
+                                <p className="data-row-name">Minimum Received Amount</p>
+                                <p className="data-row-value">{isLoading ? <Skeleton width="100px" /> : `${minimumReceivedAmount} ${bond.displayUnits}`}</p>
+                            </div>
+                            <div className="data-row">
                                 <p className="data-row-name">Approximately you will get</p>
-                                <p className="data-row-value">{isLoading ? <Skeleton width="100px" /> : `~ ${minimumReceivedAmount} ${bond.displayUnits}`}</p>
+                                <p className="data-row-value">{isLoading ? <Skeleton width="100px" /> : `~ ${trim(bond.bondQuote, 4)} TIME`}</p>
+                            </div>
+                            <div className="data-row">
+                                <p className="data-row-name">Max You Can Buy</p>
+                                <p className="data-row-value">{isLoading ? <Skeleton width="100px" /> : `${trim(bond.maxBondPrice, 4)} TIME`}</p>
+                            </div>
+                            <div className="data-row">
+                                <p className="data-row-name">ROI</p>
+                                <p className="data-row-value">{isLoading ? <Skeleton width="100px" /> : `${trim(bond.bondDiscount * 100, 2)}%`}</p>
+                            </div>
+                            <div className="data-row">
+                                <p className="data-row-name">Minimum purchase</p>
+                                <p className="data-row-value">0.01 TIME</p>
                             </div>
                         </div>
                     </div>

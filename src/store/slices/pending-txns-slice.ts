@@ -28,10 +28,6 @@ export const getStakingTypeText = (action: string) => {
     return action.toLowerCase() === "stake" ? "Staking TIME" : "Unstaking MEMO";
 };
 
-export const getFarmStakingTypeText = (action: string) => {
-    return action.toLowerCase() === "stake" ? "Staking wMEMO" : "Unstaking wMEMO";
-};
-
 export const getWrappingTypeText = (isWrap: boolean) => {
     return isWrap ? "Wrap MEMO" : "Unwrap wMEMO";
 };

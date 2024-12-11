@@ -50,12 +50,12 @@ export const changeApproval = createAsyncThunk("wrapping/changeApproval", async 
 
     await sleep(2);
 
-    const memoAllowance = await memoContract.allowance(address, addresses.WMEMO_ADDRESS);
+    const wmemoAllowance = await memoContract.allowance(address, addresses.WMEMO_ADDRESS);
 
     return dispatch(
         fetchAccountSuccess({
             wrapping: {
-                memo: Number(memoAllowance),
+                wmemo: Number(wmemoAllowance),
             },
         }),
     );
@@ -159,43 +159,34 @@ export const calcWrapDetails = createAsyncThunk("wrapping/calcWrapDetails", asyn
 });
 
 export interface IWrapPrice {
+    isWrap: boolean;
     provider: StaticJsonRpcProvider | JsonRpcProvider;
     networkID: Networks;
 }
 
-export const calcWrapPrice = createAsyncThunk("wrapping/calcWrapPrice", async ({ provider, networkID }: IWrapPrice, { dispatch }) => {
+export const calcWrapPrice = createAsyncThunk("wrapping/calcWrapPrice", async ({ isWrap, provider, networkID }: IWrapPrice, { dispatch }) => {
     if (!provider) {
         dispatch(warning({ text: messages.please_connect_wallet }));
         return;
     }
 
-    const memoWmemo = await calcWrapValue({ isWrap: true, value: "1", provider, networkID });
-    const wmemoMemo = await calcWrapValue({ isWrap: false, value: "1", provider, networkID });
+    const wrapPrice = await calcWrapValue({ isWrap, value: "1", provider, networkID });
 
     return {
-        prices: {
-            memoWmemo,
-            wmemoMemo,
-        },
+        wrapPrice,
     };
 });
 
 export interface IWrapSlice {
     loading: boolean;
     wrapValue: "";
-    prices: {
-        memoWmemo: number;
-        wmemoMemo: number;
-    };
+    wrapPrice: number;
 }
 
 const initialState: IWrapSlice = {
     loading: true,
     wrapValue: "",
-    prices: {
-        memoWmemo: 0,
-        wmemoMemo: 0,
-    },
+    wrapPrice: 0,
 };
 
 const wrapSlice = createSlice({

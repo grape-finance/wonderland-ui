@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { Grid, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Zoom } from "@material-ui/core";
+import { Paper, Grid, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Zoom } from "@material-ui/core";
 import { BondTableData, BondDataCard } from "./BondRow";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { trim } from "../../helpers";
@@ -7,24 +7,14 @@ import useBonds from "../../hooks/bonds";
 import "./choosebond.scss";
 import { Skeleton } from "@material-ui/lab";
 import { IReduxState } from "../../store/slices/state.interface";
-import { useHistory } from "react-router-dom";
-import { usePathForNetwork, useWeb3Context } from "../../hooks";
-import { Networks } from "../../constants/blockchain";
-import { useMemo } from "react";
 
 function ChooseBond() {
-    const history = useHistory();
-    const { chainID } = useWeb3Context();
-
-    usePathForNetwork({ pathName: "mints", networkID: chainID, history });
-
     const { bonds } = useBonds();
     const isSmallScreen = useMediaQuery("(max-width: 733px)"); // change to breakpoint query
 
     const isAppLoading = useSelector<IReduxState, boolean>(state => state.app.loading);
-
-    const wmemoPrice = useSelector<IReduxState, number>(state => {
-        return state.app.wMemoMarketPrice;
+    const marketPrice = useSelector<IReduxState, number>(state => {
+        return state.app.marketPrice;
     });
 
     const treasuryBalance = useSelector<IReduxState, number>(state => {
@@ -36,13 +26,13 @@ function ChooseBond() {
             <Zoom in={true}>
                 <div className="choose-bond-view-card">
                     <div className="choose-bond-view-card-header">
-                        <p className="choose-bond-view-card-title">{chainID === Networks.AVAX ? "Mint (🫖, 🫖)" : "Treasury sales"}</p>
+                        <p className="choose-bond-view-card-title"> Mint (🫖, 🫖)</p>
                     </div>
 
                     <Grid container item xs={12} spacing={2} className="choose-bond-view-card-metrics">
                         <Grid item xs={12} sm={6}>
                             <Box textAlign="center">
-                                <p className="choose-bond-view-card-metrics-title">{chainID === Networks.AVAX ? "Treasury Balance" : "Total Bonded"}</p>
+                                <p className="choose-bond-view-card-metrics-title">Treasury Balance</p>
                                 <p className="choose-bond-view-card-metrics-value">
                                     {isAppLoading ? (
                                         <Skeleton width="180px" />
@@ -60,8 +50,8 @@ function ChooseBond() {
 
                         <Grid item xs={12} sm={6}>
                             <Box textAlign="center">
-                                <p className="choose-bond-view-card-metrics-title">wMEMO Price</p>
-                                <p className="choose-bond-view-card-metrics-value">{isAppLoading ? <Skeleton width="100px" /> : `$${trim(wmemoPrice, 2)}`}</p>
+                                <p className="choose-bond-view-card-metrics-title">TIME Price</p>
+                                <p className="choose-bond-view-card-metrics-value">{isAppLoading ? <Skeleton width="100px" /> : `$${trim(marketPrice, 2)}`}</p>
                             </Box>
                         </Grid>
                     </Grid>
@@ -88,11 +78,9 @@ function ChooseBond() {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {bonds.map(bond => {
-                                            if (bond.getAvailability(chainID)) {
-                                                return <BondTableData key={bond.name} bond={bond} />;
-                                            }
-                                        })}
+                                        {bonds.map(bond => (
+                                            <BondTableData key={bond.name} bond={bond} />
+                                        ))}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
@@ -104,15 +92,11 @@ function ChooseBond() {
             {isSmallScreen && (
                 <div className="choose-bond-view-card-container">
                     <Grid container item spacing={2}>
-                        {bonds.map(bond => {
-                            if (bond.getAvailability(chainID)) {
-                                return (
-                                    <Grid item xs={12} key={bond.name}>
-                                        <BondDataCard key={bond.name} bond={bond} />
-                                    </Grid>
-                                );
-                            }
-                        })}
+                        {bonds.map(bond => (
+                            <Grid item xs={12} key={bond.name}>
+                                <BondDataCard key={bond.name} bond={bond} />
+                            </Grid>
+                        ))}
                     </Grid>
                 </div>
             )}
