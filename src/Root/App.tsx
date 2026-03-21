@@ -9,7 +9,7 @@ import { IReduxState } from "../store/slices/state.interface";
 import Loading from "../components/Loader";
 import useBonds from "../hooks/bonds";
 import ViewBase from "../components/ViewBase";
-import { Stake, ChooseBond, Bond, Dashboard, NotFound, Calculator, Bridge, Fund, Blog, Redemption, Farm } from "../views";
+import { Stake, ChooseBond, Bond, Dashboard, NotFound, Calculator, Fund, Redemption, Farm } from "../views";
 import "./style.scss";
 import useTokens from "../hooks/tokens";
 import { Networks } from "../constants/blockchain";
@@ -51,7 +51,7 @@ function App() {
         //     });
         // }
 
-        // if (whichDetails === "userTokens" && address && connected && chainID === Networks.AVAX) {
+        // if (whichDetails === "userTokens" && address && connected && chainID === Networks.PULSE) {
         //     tokens.map(token => {
         //         dispatch(calculateUserTokenDetails({ address, token, provider, networkID: chainID }));
         //     });
@@ -70,7 +70,7 @@ function App() {
             //         }
             //     }
             // });
-            if (chainID === Networks.AVAX) {
+            if (chainID === Networks.PULSE) {
                 dispatch(calcWrapPrice({ networkID: chainID, provider: loadProvider }));
                 // tokens.map(token => {
                 //     dispatch(calculateUserTokenDetails({ address: "", token, provider, networkID: chainID }));
@@ -126,7 +126,7 @@ function App() {
                 </Route>
 
                 <Route exact path="/">
-                    <Redirect to="/bridge" />
+                    <Redirect to="/dashboard" />
                 </Route>
 
                 <Route path="/stake">
@@ -154,16 +154,8 @@ function App() {
                     <Farm />
                 </Route>
 
-                <Route path="/bridge">
-                    <Bridge />
-                </Route>
-
                 <Route exact path="/fund">
                     <Fund />
-                </Route>
-
-                <Route path="/blog">
-                    <Blog />
                 </Route>
 
                 <Route path="/redemption">

@@ -1,6 +1,6 @@
-import { Box, Modal, Paper, SvgIcon, IconButton, FormControl, OutlinedInput, InputLabel, InputAdornment } from "@material-ui/core";
+import { Box, Modal, Paper, SvgIcon, IconButton, FormControl, OutlinedInput, InputLabel, InputAdornment } from "@mui/material";
 import { useEffect, useState } from "react";
-import { ReactComponent as XIcon } from "../../assets/icons/x.svg";
+import XIcon from "../../assets/icons/x.svg?react";
 import "./bondSettings.scss";
 
 interface IAdvancedSettingsProps {

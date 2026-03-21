@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { ReactComponent as XIcon } from "../../../assets/icons/x.svg";
-import { Box, Modal, Paper, SvgIcon, IconButton, OutlinedInput, InputAdornment } from "@material-ui/core";
+import XIcon from "../../../assets/icons/x.svg?react";
+import { Box, Modal, Paper, SvgIcon, IconButton, OutlinedInput, InputAdornment } from "@mui/material";
 import "./zapin.scss";
 import ArrowUpImg from "../../../assets/icons/arrow-down.svg";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import ChooseToken from "./ChooseToken";
 import { IAllBondData } from "../../../hooks/bonds";
 import useTokens, { IAllTokenData } from "../../../hooks/tokens";
@@ -17,7 +17,7 @@ import { IPendingTxn, isPendingTxn, txnButtonText } from "../../../store/slices/
 import { useWeb3Context } from "../../../hooks";
 import { wavax } from "../../../helpers/bond";
 import AdvancedSettings from "../AdvancedSettings";
-import { ReactComponent as SettingsIcon } from "../../../assets/icons/settings.svg";
+import SettingsIcon from "../../../assets/icons/settings.svg?react";
 import { warning } from "../../../store/slices/messages-slice";
 import { messages } from "../../../constants/messages";
 import { utils } from "ethers";
@@ -192,7 +192,7 @@ function Zapin({ open, handleClose, bond }: IZapinProps) {
                                 className="zapin-header-token-select-input"
                                 value={quantity}
                                 onChange={e => setQuantity(e.target.value)}
-                                labelWidth={0}
+                               
                                 startAdornment={
                                     <InputAdornment position="start">
                                         <div onClick={handleChooseTokenOpen} className="zapin-header-token-select-input-token-select">

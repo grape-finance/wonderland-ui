@@ -1,73 +1,40 @@
-import AvaxIcon from "../assets/networks/avalanche-icon.png";
-import FtmIcon from "../assets/networks/fantom-icon.svg";
-import EthIcon from "../assets/networks/ethereum-icon.svg";
-import AethIcon from "../assets/networks/arbitrum-icon.svg";
-
 export const TOKEN_DECIMALS = 9;
 
 export enum Networks {
-    AVAX = 43114,
-    FANTOM = 250,
-    ETH = 1,
-    AETH = 42161,
+    PULSE = 369,
+    PULSE_TESTNET = 943,
 }
 
-export const DEFAULD_NETWORK = Networks.AVAX;
+export const DEFAULD_NETWORK = Networks.PULSE;
 
-export const AVAILABLE_CHAINS = [Networks.AVAX, Networks.FANTOM, Networks.ETH, Networks.AETH];
-export const WMEMO_BRIDG_CHAINS = [Networks.AVAX, Networks.FANTOM, Networks.ETH, Networks.AETH];
+export const AVAILABLE_CHAINS = [Networks.PULSE, Networks.PULSE_TESTNET];
+export const WMEMO_BRIDG_CHAINS = [Networks.PULSE, Networks.PULSE_TESTNET];
 
 export const NetworksInfo = {
-    [Networks.AVAX]: {
-        chainId: "0xa86a",
-        chainName: "Avalanche",
-        shortName: "AVAX",
-        rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
-        blockExplorerUrls: ["https://cchain.explorer.avax.network/"],
+    [Networks.PULSE]: {
+        chainId: "0x171",
+        chainName: "PulseChain",
+        shortName: "PLS",
+        rpcUrls: ["https://rpc-pulsechain.g4mm4.io"],
+        blockExplorerUrls: ["https://scan.mypinata.cloud/ipfs/bafybeih3olry3is4e4lzm7rus5l3h6zrphcal5a7ayfkhzm5oivjro2cp4/#"],
         nativeCurrency: {
-            name: "AVAX",
-            symbol: "AVAX",
+            name: "Pulse",
+            symbol: "PLS",
             decimals: 18,
         },
-        img: AvaxIcon,
+        img: "/BBlogo-purple-main-circle.png",
     },
-    [Networks.FANTOM]: {
-        chainId: "0xfa",
-        chainName: "Fantom",
-        shortName: "FTM",
-        rpcUrls: ["https://rpc.ftm.tools/", "https://rpcapi.fantom.network/", "https://rpc.fantom.network/"],
-        blockExplorerUrls: ["https://ftmscan.com/"],
+    [Networks.PULSE_TESTNET]: {
+        chainId: "0x3AF",
+        chainName: "PulseChain Testnet",
+        shortName: "tPLS",
+        rpcUrls: ["https://rpc-testnet-pulsechain.g4mm4.io"],
+        blockExplorerUrls: ["https://scan.v4.testnet.pulsechain.com"],
         nativeCurrency: {
-            name: "Fantom",
-            symbol: "FTM",
+            name: "Test Pulse",
+            symbol: "tPLS",
             decimals: 18,
         },
-        img: FtmIcon,
-    },
-    [Networks.ETH]: {
-        chainId: "0x1",
-        chainName: "Ethereum",
-        shortName: "ETH",
-        rpcUrls: ["https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
-        blockExplorerUrls: ["https://etherscan.io"],
-        nativeCurrency: {
-            name: "Ethereum",
-            symbol: "ETH",
-            decimals: 18,
-        },
-        img: EthIcon,
-    },
-    [Networks.AETH]: {
-        chainId: "0xa4b1",
-        chainName: "Arbitrum",
-        shortName: "AETH",
-        rpcUrls: ["https://arb1.arbitrum.io/rpc"],
-        blockExplorerUrls: ["https://arbiscan.io"],
-        nativeCurrency: {
-            name: "Ether",
-            symbol: "AETH",
-            decimals: 18,
-        },
-        img: AethIcon,
+        img: "/BBlogo-purple-main-circle.png",
     },
 };

@@ -1,4 +1,4 @@
-import { Zoom } from "@material-ui/core";
+import { Zoom } from "@mui/material";
 import "./fund.scss";
 import Accordion from "./components/Accordion";
 import WalletIcon from "../../assets/icons/wallet.svg";

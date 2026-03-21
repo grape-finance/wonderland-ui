@@ -1,11 +1,11 @@
 import { useSelector } from "react-redux";
-import { Grid, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Zoom } from "@material-ui/core";
+import { Grid, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Zoom } from "@mui/material";
 import { BondTableData, BondDataCard } from "./BondRow";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { trim } from "../../helpers";
 import useBonds from "../../hooks/bonds";
 import "./choosebond.scss";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { useHistory } from "react-router-dom";
 import { usePathForNetwork, useWeb3Context } from "../../hooks";
@@ -36,13 +36,13 @@ function ChooseBond() {
             <Zoom in={true}>
                 <div className="choose-bond-view-card">
                     <div className="choose-bond-view-card-header">
-                        <p className="choose-bond-view-card-title">{chainID === Networks.AVAX ? "Mint (🫖, 🫖)" : "Treasury sales"}</p>
+                        <p className="choose-bond-view-card-title">{chainID === Networks.PULSE ? "Mint (🫖, 🫖)" : "Treasury sales"}</p>
                     </div>
 
                     <Grid container item xs={12} spacing={2} className="choose-bond-view-card-metrics">
                         <Grid item xs={12} sm={6}>
                             <Box textAlign="center">
-                                <p className="choose-bond-view-card-metrics-title">{chainID === Networks.AVAX ? "Treasury Balance" : "Total Bonded"}</p>
+                                <p className="choose-bond-view-card-metrics-title">{chainID === Networks.PULSE ? "Treasury Balance" : "Total Bonded"}</p>
                                 <p className="choose-bond-view-card-metrics-value">
                                     {isAppLoading ? (
                                         <Skeleton width="180px" />

@@ -1,13 +1,11 @@
-import React, { useState, ReactElement, useContext, useMemo, useCallback } from "react";
-import Web3Modal from "web3modal";
+import React, { ReactElement, useContext, useMemo, useCallback, useEffect, useState } from "react";
 import { StaticJsonRpcProvider, JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
-import WalletConnectProvider from "@walletconnect/web3-provider";
+import { useAccount, useDisconnect, useSigner, useSwitchNetwork, useNetwork } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { getMainnetURI } from "./helpers";
 import { DEFAULD_NETWORK, AVAILABLE_CHAINS } from "../../constants";
 import { Networks } from "../../constants";
 import { messages } from "../../constants/messages";
-import { useDispatch } from "react-redux";
-import { swithNetwork } from "../../helpers/switch-network";
 
 type onChainProvider = {
     connect: () => Promise<Web3Provider>;
@@ -17,7 +15,7 @@ type onChainProvider = {
     provider: JsonRpcProvider;
     address: string;
     connected: Boolean;
-    web3Modal: Web3Modal;
+    web3Modal: null;
     chainID: number;
     web3?: any;
     providerChainID: number;
@@ -47,109 +45,58 @@ export const useAddress = () => {
 };
 
 export const Web3ContextProvider: React.FC<{ children: ReactElement }> = ({ children }) => {
-    const dispatch = useDispatch();
+    const { address: wagmiAddress, isConnected } = useAccount();
+    const { chain } = useNetwork();
+    const { disconnect: wagmiDisconnect } = useDisconnect();
+    const { openConnectModal } = useConnectModal();
+    const { switchNetwork: wagmiSwitchNetwork } = useSwitchNetwork();
+    const { data: signer } = useSigner();
 
-    const [connected, setConnected] = useState(false);
+    const walletChainId = chain?.id;
     const [chainID, setChainID] = useState(DEFAULD_NETWORK);
-    const [providerChainID, setProviderChainID] = useState(DEFAULD_NETWORK);
-    const [address, setAddress] = useState("");
 
-    const [uri, setUri] = useState(getMainnetURI(chainID));
-    const [provider, setProvider] = useState<JsonRpcProvider>(new StaticJsonRpcProvider(uri));
-
-    const [web3Modal] = useState<Web3Modal>(
-        new Web3Modal({
-            cacheProvider: true,
-            providerOptions: {
-                walletconnect: {
-                    package: WalletConnectProvider,
-                    options: {
-                        rpc: {
-                            [Networks.AVAX]: getMainnetURI(Networks.AVAX),
-                            [Networks.FANTOM]: getMainnetURI(Networks.FANTOM),
-                            [Networks.ETH]: getMainnetURI(Networks.ETH),
-                            [Networks.AETH]: getMainnetURI(Networks.AETH),
-                        },
-                    },
-                },
-            },
-        }),
-    );
-
-    const hasCachedProvider = (): boolean => {
-        if (!web3Modal) return false;
-        if (!web3Modal.cachedProvider) return false;
-        return true;
-    };
-
-    const _initListeners = useCallback(
-        (rawProvider: JsonRpcProvider) => {
-            if (!rawProvider.on) {
-                return;
-            }
-
-            rawProvider.on("accountsChanged", () => setTimeout(() => window.location.reload(), 1));
-
-            rawProvider.on("chainChanged", () => setTimeout(() => window.location.reload(), 1));
-
-            rawProvider.on("network", (_newNetwork, oldNetwork) => {
-                if (!oldNetwork) return;
-                window.location.reload();
-            });
-        },
-        [provider],
-    );
-
-    const connect = useCallback(async () => {
-        const rawProvider = await web3Modal.connect();
-
-        _initListeners(rawProvider);
-
-        const connectedProvider = new Web3Provider(rawProvider, "any");
-
-        const chainId = await connectedProvider.getNetwork().then(network => Number(network.chainId));
-        const connectedAddress = await connectedProvider.getSigner().getAddress();
-
-        setAddress(connectedAddress);
-
-        setProviderChainID(chainId);
-
-        if (AVAILABLE_CHAINS.includes(chainId)) {
-            setProvider(connectedProvider);
-            setChainID(chainId);
+    useEffect(() => {
+        if (walletChainId && AVAILABLE_CHAINS.includes(walletChainId)) {
+            setChainID(walletChainId);
         }
+    }, [walletChainId]);
 
-        setConnected(true);
+    const provider = useMemo((): JsonRpcProvider => {
+        if (signer?.provider && isConnected) {
+            return signer.provider as Web3Provider;
+        }
+        return new StaticJsonRpcProvider(getMainnetURI(chainID));
+    }, [signer, isConnected, chainID]);
 
-        return connectedProvider;
-    }, [provider, web3Modal, connected]);
+    const connect = useCallback(async (): Promise<Web3Provider> => {
+        openConnectModal?.();
+        return provider as Web3Provider;
+    }, [openConnectModal, provider]);
 
-    const checkWrongNetwork = async (): Promise<boolean> => {
-        if (!AVAILABLE_CHAINS.includes(providerChainID)) {
+    const disconnect = useCallback(() => {
+        wagmiDisconnect();
+    }, [wagmiDisconnect]);
+
+    const switchNetwork = useCallback(
+        (chainId: Networks) => {
+            wagmiSwitchNetwork?.(chainId);
+        },
+        [wagmiSwitchNetwork],
+    );
+
+    const checkWrongNetwork = useCallback(async (): Promise<boolean> => {
+        if (!walletChainId || !AVAILABLE_CHAINS.includes(walletChainId)) {
             const shouldSwitch = window.confirm(messages.switch_to_avalanche);
             if (shouldSwitch) {
-                await swithNetwork();
-                window.location.reload();
+                wagmiSwitchNetwork?.(DEFAULD_NETWORK);
             }
             return true;
         }
-
         return false;
-    };
+    }, [walletChainId, wagmiSwitchNetwork]);
 
-    const disconnect = useCallback(async () => {
-        web3Modal.clearCachedProvider();
-        setConnected(false);
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 1);
-    }, [provider, web3Modal, connected]);
-
-    const switchNetwork = async (chain: Networks) => {
-        await swithNetwork(chain);
-        window.location.reload();
-    };
+    // wagmi autoConnect handles reconnection
+    const hasCachedProvider = useCallback((): boolean => false, []);
 
     const onChainProvider = useMemo(
         () => ({
@@ -157,16 +104,16 @@ export const Web3ContextProvider: React.FC<{ children: ReactElement }> = ({ chil
             disconnect,
             hasCachedProvider,
             provider,
-            connected,
-            address,
+            connected: isConnected,
+            address: wagmiAddress ?? "",
             chainID,
-            web3Modal,
-            providerChainID,
+            web3Modal: null,
+            providerChainID: walletChainId ?? DEFAULD_NETWORK,
             checkWrongNetwork,
             switchNetwork,
         }),
-        [connect, disconnect, hasCachedProvider, provider, connected, address, chainID, web3Modal, providerChainID],
+        [connect, disconnect, hasCachedProvider, provider, isConnected, wagmiAddress, chainID, walletChainId, checkWrongNetwork, switchNetwork],
     );
-    //@ts-ignore
+
     return <Web3Context.Provider value={{ onChainProvider }}>{children}</Web3Context.Provider>;
 };

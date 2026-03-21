@@ -1,4 +1,4 @@
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
 import React, { useMemo, useState } from "react";
 import { PieChart } from "react-minimal-pie-chart";
 import { DataEntry } from "react-minimal-pie-chart/types/commonTypes";
@@ -91,7 +91,7 @@ function Chart({ data, total }: IChart) {
                             </text>
                         )}
                         labelPosition={0}
-                        radius={PieChart.defaultProps.radius - 6}
+                        radius={44}
                         onClick={(event, index) => handleCardSelect(index)}
                         segmentsStyle={index => {
                             return index === selected ? { ...segmentsStyle, strokeWidth: 11 } : segmentsStyle;

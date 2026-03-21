@@ -7,11 +7,11 @@ import { getAddresses } from "../constants/addresses";
 import { wMemoTokenContract } from "../abi";
 
 export async function getMarketPrice() {
-    const uri = getMainnetURI(Networks.AVAX);
-    const addresses = getAddresses(Networks.AVAX);
+    const uri = getMainnetURI(Networks.PULSE);
+    const addresses = getAddresses(Networks.PULSE);
     const provider = new StaticJsonRpcProvider(uri);
 
-    const pairContract = wmemoMim.getContractForReserve(Networks.AVAX, provider);
+    const pairContract = wmemoMim.getContractForReserve(Networks.PULSE, provider);
     const reserves = await pairContract.getReserves();
 
     const wMemoPrice = reserves[1] / reserves[0];

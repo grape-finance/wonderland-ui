@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./calculator.scss";
 import { useSelector } from "react-redux";
-import { Grid, InputAdornment, OutlinedInput, Zoom, Slider } from "@material-ui/core";
+import { Grid, InputAdornment, OutlinedInput, Zoom, Slider } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { trim } from "../../helpers";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { useHistory } from "react-router-dom";
 import { usePathForNetwork, useWeb3Context } from "../../hooks";
 
@@ -117,7 +117,7 @@ function Calculator() {
                                                     className="calculator-card-action-input"
                                                     value={wmemoAmount}
                                                     onChange={e => setWMemoAmount(e.target.value)}
-                                                    labelWidth={0}
+                                                   
                                                     endAdornment={
                                                         <InputAdornment position="end">
                                                             <div onClick={() => setWMemoAmount(trimmedWMemoBalance)} className="stake-card-action-input-btn">
@@ -137,7 +137,7 @@ function Calculator() {
                                                     className="calculator-card-action-input"
                                                     value={rewardYield}
                                                     onChange={e => setRewardYield(e.target.value)}
-                                                    labelWidth={0}
+                                                   
                                                     endAdornment={
                                                         <InputAdornment position="end">
                                                             <div onClick={() => setRewardYield(trimmedStakingAPY)} className="stake-card-action-input-btn">

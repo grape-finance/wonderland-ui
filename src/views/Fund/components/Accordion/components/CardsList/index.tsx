@@ -1,4 +1,4 @@
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
 import { IData } from "src/hooks/types";
 import Card from "./components/Card";
 

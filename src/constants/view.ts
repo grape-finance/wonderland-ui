@@ -11,40 +11,22 @@ interface IViewsForNetwork {
 }
 
 export const VIEWS_FOR_NETWORK: { [key: number]: IViewsForNetwork } = {
-    [Networks.ETH]: {
+    [Networks.PULSE]: {
         dashboard: true,
-        stake: false,
+        stake: true,
         mints: false,
-        calculator: false,
-        farm: false,
-        fund: false,
-        redemption: false,
-    },
-    [Networks.AVAX]: {
-        dashboard: true,
-        stake: false,
-        mints: false,
-        calculator: false,
+        calculator: true,
         farm: true,
-        fund: false,
-        redemption: false,
+        fund: true,
+        redemption: true,
     },
-    [Networks.FANTOM]: {
+    [Networks.PULSE_TESTNET]: {
         dashboard: true,
-        stake: false,
+        stake: true,
         mints: false,
-        calculator: false,
-        farm: false,
-        fund: false,
-        redemption: false,
-    },
-    [Networks.AETH]: {
-        dashboard: true,
-        stake: false,
-        mints: false,
-        calculator: false,
-        farm: false,
-        fund: false,
-        redemption: false,
+        calculator: true,
+        farm: true,
+        fund: true,
+        redemption: true,
     },
 };

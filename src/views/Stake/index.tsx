@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Grid, InputAdornment, OutlinedInput, Zoom } from "@material-ui/core";
+import { Grid, InputAdornment, OutlinedInput, Zoom } from "@mui/material";
 import RebaseTimer from "../../components/RebaseTimer";
 import { trim } from "../../helpers";
 import { changeStake, changeApproval } from "../../store/slices/stake-thunk";
 import "./stake.scss";
 import { usePathForNetwork, useWeb3Context } from "../../hooks";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { messages } from "../../constants/messages";
 import classnames from "classnames";
@@ -188,7 +188,7 @@ function Stake() {
                                                 className="stake-card-action-input"
                                                 value={quantity}
                                                 onChange={e => setQuantity(e.target.value)}
-                                                labelWidth={0}
+                                               
                                                 endAdornment={
                                                     <InputAdornment position="end">
                                                         <div onClick={setMax} className="stake-card-action-input-btn">

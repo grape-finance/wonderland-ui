@@ -1,8 +1,8 @@
 import { useSelector } from "react-redux";
-import { Grid, Zoom } from "@material-ui/core";
+import { Grid, Zoom } from "@mui/material";
 import { trim } from "../../helpers";
 import "./dashboard.scss";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { IAppSlice } from "../../store/slices/app-slice";
 import { useHistory } from "react-router-dom";

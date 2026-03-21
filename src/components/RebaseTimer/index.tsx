@@ -1,8 +1,8 @@
 import { useSelector } from "react-redux";
 import { secondsUntilBlock, prettifySeconds } from "../../helpers";
-import { Box } from "@material-ui/core";
+import { Box } from "@mui/material";
 import "./rebasetimer.scss";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { useMemo } from "react";
 import { IReduxState } from "../../store/slices/state.interface";
 

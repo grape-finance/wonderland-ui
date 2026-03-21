@@ -1,5 +1,5 @@
-import { Grid, InputAdornment, OutlinedInput, Zoom } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Grid, InputAdornment, OutlinedInput, Zoom } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -56,7 +56,7 @@ function Redemption() {
         return state.app && state.app.redemptionDeadline;
     });
 
-    const hasAllowance = useCallback(() => (chainID === Networks.AVAX ? wMemoAllowance > 0 : true), [wMemoAllowance, chainID]);
+    const hasAllowance = useCallback(() => (chainID === Networks.PULSE ? wMemoAllowance > 0 : true), [wMemoAllowance, chainID]);
 
     const trimmedWmemoBalance = trim(Number(wmemoBalance), 6);
     const trimmedAvailableToClaim = trim(Number(availableToClaim), 6);
@@ -72,6 +72,7 @@ function Redemption() {
             setBsggConvert("");
             return;
         }
+        if (redemptionRateUsdc == null || redemptionRateBsgg == null) return;
         const usdc = BigNumber.from(ethers.utils.parseEther(amount))
             .mul(BigNumber.from(redemptionRateUsdc).mul(Math.pow(10, 12)))
             .div(ethers.utils.parseEther("1"));
@@ -144,7 +145,7 @@ function Redemption() {
                                                 className="redemption-input"
                                                 value={quantity}
                                                 onChange={e => handleSetQuantity(e.target.value)}
-                                                labelWidth={0}
+                                               
                                                 startAdornment={
                                                     <InputAdornment position="start">
                                                         <div className="redemption-input-token-wrap">
@@ -172,7 +173,7 @@ function Redemption() {
                                                 placeholder="Amount"
                                                 className="redemption-input"
                                                 value={usdcConvert}
-                                                labelWidth={0}
+                                               
                                                 disabled
                                                 startAdornment={
                                                     <InputAdornment position="start">
@@ -191,7 +192,7 @@ function Redemption() {
                                                 placeholder="Amount"
                                                 className="redemption-input"
                                                 value={bsggConvert}
-                                                labelWidth={0}
+                                               
                                                 disabled
                                                 startAdornment={
                                                     <InputAdornment position="start">
@@ -243,7 +244,7 @@ function Redemption() {
                                         <div className="data-row">
                                             <p className="data-row-name">Rate</p>
                                             <p className="data-row-value">
-                                                {isAppLoading ? (
+                                                {isAppLoading || redemptionRateUsdc == null || redemptionRateBsgg == null ? (
                                                     <Skeleton width="80px" />
                                                 ) : (
                                                     <div style={{ display: "flex" }}>

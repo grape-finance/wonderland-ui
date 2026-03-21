@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { ReactComponent as XIcon } from "../../../../assets/icons/x.svg";
-import { Box, Modal, Paper, SvgIcon, IconButton, OutlinedInput, InputAdornment } from "@material-ui/core";
+import XIcon from "../../../../assets/icons/x.svg?react";
+import { Box, Modal, Paper, SvgIcon, IconButton, OutlinedInput, InputAdornment } from "@mui/material";
 import "./choose-token.scss";
 
 import IconsSearch from "../../../../assets/icons/akar-icons_search.svg";
 
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import useTokens, { IAllTokenData } from "../../../../hooks/tokens";
 import { trim } from "../../../../helpers";
 import { IAllBondData } from "../../../../hooks/bonds";
@@ -70,7 +70,7 @@ function ChooseToken({ open, handleClose, handleSelect, bond }: IChooseTokenProp
                             className="choose-token-poper-header-input"
                             value={quantity}
                             onChange={e => setQuantity(e.target.value)}
-                            labelWidth={0}
+                           
                             startAdornment={
                                 <InputAdornment position="start">
                                     <Box display="flex" alignItems="center" justifyContent="center" width={"24px"}>

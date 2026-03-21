@@ -20,7 +20,7 @@ export const mim = new StableBond({
     bondContractABI: StableBondContract,
     reserveContractAbi: StableReserveContract,
     networkAddrs: {
-        [Networks.AVAX]: {
+        [Networks.PULSE]: {
             bondAddress: "0x694738E0A438d90487b4a549b201142c1a97B556",
             reserveAddress: "0x130966628846BFd36ff31a822705796e8cb8C18D",
         },
@@ -29,10 +29,10 @@ export const mim = new StableBond({
     v2Bond: false,
     deprecated: true,
     isAvailable: {
-        [Networks.AVAX]: true,
-        [Networks.ETH]: false,
-        [Networks.FANTOM]: false,
-        [Networks.AETH]: false,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
     },
 });
 
@@ -44,25 +44,25 @@ export const mimPro = new StableV2Bond({
     bondContractABI: ProBondContract,
     reserveContractAbi: StableReserveContract,
     networkAddrs: {
-        [Networks.FANTOM]: {
+        [Networks.PULSE]: {
             bondAddress: "0x629a650E173B730E0F7C1206BF9f74808F475d1b",
             reserveAddress: "0x82f0b8b456c1a451378467398982d4834b6829c1",
         },
-        [Networks.AETH]: {
+        [Networks.PULSE]: {
             bondAddress: "0x50f40350cbB170B6e5D2cC0859ac84ca17044d0a",
             reserveAddress: "0xfea7a6a0b346362bf88a9e4a88416b77a57d6c2a",
         },
-        [Networks.ETH]: {
+        [Networks.PULSE]: {
             bondAddress: "0x17451Eb19D34e6c8404C3188F2fcc46c493146C9",
             reserveAddress: "0x99D8a9C45b2ecA8864373A26D1459e3Dff1e17F3",
         },
     },
     v2Bond: true,
     isAvailable: {
-        [Networks.AVAX]: false,
-        [Networks.ETH]: true,
-        [Networks.FANTOM]: true,
-        [Networks.AETH]: true,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: true,
     },
     disableZap: true,
     deprecated: true,
@@ -76,7 +76,7 @@ export const wavax = new CustomBond({
     bondContractABI: WavaxBondContract,
     reserveContractAbi: StableReserveContract,
     networkAddrs: {
-        [Networks.AVAX]: {
+        [Networks.PULSE]: {
             bondAddress: "0xE02B1AA2c4BE73093BE79d763fdFFC0E3cf67318",
             reserveAddress: "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7",
         },
@@ -85,10 +85,10 @@ export const wavax = new CustomBond({
     deprecated: true,
     v2Bond: false,
     isAvailable: {
-        [Networks.AVAX]: true,
-        [Networks.ETH]: false,
-        [Networks.FANTOM]: false,
-        [Networks.AETH]: false,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
     },
 });
 
@@ -100,7 +100,7 @@ export const weth = new CustomBond({
     bondContractABI: WethBondContract,
     reserveContractAbi: StableReserveContract,
     networkAddrs: {
-        [Networks.AVAX]: {
+        [Networks.PULSE]: {
             bondAddress: "0x858636F350fC812C3C88D1578925C502727ab323",
             reserveAddress: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab",
         },
@@ -108,10 +108,10 @@ export const weth = new CustomBond({
     tokensInStrategy: "17005026257974854243669",
     v2Bond: false,
     isAvailable: {
-        [Networks.AVAX]: true,
-        [Networks.ETH]: false,
-        [Networks.FANTOM]: false,
-        [Networks.AETH]: false,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
     },
     disableZap: true,
     deprecated: true,
@@ -125,7 +125,7 @@ export const mimTime = new LPBond({
     bondContractABI: LpBondContract,
     reserveContractAbi: LpReserveContract,
     networkAddrs: {
-        [Networks.AVAX]: {
+        [Networks.PULSE]: {
             bondAddress: "0xA184AE1A71EcAD20E822cB965b99c287590c4FFe",
             reserveAddress: "0x113f413371fc4cc4c9d6416cf1de9dfd7bf747df",
         },
@@ -136,10 +136,10 @@ export const mimTime = new LPBond({
     deprecated: true,
     v2Bond: false,
     isAvailable: {
-        [Networks.AVAX]: true,
-        [Networks.ETH]: false,
-        [Networks.FANTOM]: false,
-        [Networks.AETH]: false,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
     },
 });
 
@@ -151,7 +151,7 @@ export const avaxTime = new CustomLPBond({
     bondContractABI: LpBondContract,
     reserveContractAbi: LpReserveContract,
     networkAddrs: {
-        [Networks.AVAX]: {
+        [Networks.PULSE]: {
             bondAddress: "0xc26850686ce755FFb8690EA156E5A6cf03DcBDE1",
             reserveAddress: "0xf64e1c5B6E17031f5504481Ac8145F4c3eab4917",
         },
@@ -162,10 +162,10 @@ export const avaxTime = new CustomLPBond({
     deprecated: true,
     v2Bond: false,
     isAvailable: {
-        [Networks.AVAX]: true,
-        [Networks.ETH]: false,
-        [Networks.FANTOM]: false,
-        [Networks.AETH]: false,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
     },
 });
 
@@ -177,7 +177,7 @@ export const wmemoMim = new NotTimeLpBond({
     bondContractABI: LpBondContract,
     reserveContractAbi: LpReserveContract,
     networkAddrs: {
-        [Networks.AVAX]: {
+        [Networks.PULSE]: {
             bondAddress: "0xb0555683EaaAaC027f917B2E0aA2D8f208b82562",
             reserveAddress: "0x4d308c46ea9f234ea515cc51f16fba776451cac8",
         },
@@ -187,10 +187,10 @@ export const wmemoMim = new NotTimeLpBond({
     tokenPriceFun: getWmemoMarketPrice,
     v2Bond: false,
     isAvailable: {
-        [Networks.AVAX]: true,
-        [Networks.ETH]: false,
-        [Networks.FANTOM]: false,
-        [Networks.AETH]: false,
+        [Networks.PULSE]: true,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
+        [Networks.PULSE]: false,
     },
     deprecated: true,
     tokensInStrategy: "40248760911630751941101",

@@ -1,9 +1,9 @@
 import { priceUnits, trim } from "../../helpers";
 import BondLogo from "../../components/BondLogo";
-import { Paper, TableRow, TableCell, Slide, Link } from "@material-ui/core";
+import { Paper, TableRow, TableCell, Slide, Link } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import "./choosebond.scss";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { IAllBondData } from "../../hooks/bonds";
 import classNames from "classnames";
 

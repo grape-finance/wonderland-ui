@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import "./liquidity-banner.scss";
-import { ReactComponent as xIcon } from "../../assets/icons/x.svg";
-import { SvgIcon } from "@material-ui/core";
+import xIcon from "../../assets/icons/x.svg?react";
+import { SvgIcon } from "@mui/material";
 import CircleIcon from "../../assets/icons/circle.svg";
 
 function LiquidityBanner() {

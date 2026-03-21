@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { usePathForNetwork, useWeb3Context } from "../../hooks";
-import { Grid, InputAdornment, OutlinedInput, Zoom } from "@material-ui/core";
+import { Grid, InputAdornment, OutlinedInput, Zoom } from "@mui/material";
 import "./farm.scss";
 import { IReduxState } from "../../store/slices/state.interface";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { trim } from "../../helpers";
 import classnames from "classnames";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
@@ -15,7 +15,7 @@ import { changeApproval, changeStake, getReward } from "../../store/slices/farm-
 import { ITokenReward, IUserRewardsDetail } from "../../store/slices/account-slice";
 import { warning } from "../../store/slices/messages-slice";
 import { messages } from "../../constants/messages";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useHistory } from "react-router-dom";
 
 function Farm() {
@@ -177,7 +177,7 @@ function Farm() {
                                             className="farm-card-action-input"
                                             value={quantity}
                                             onChange={e => setQuantity(e.target.value)}
-                                            labelWidth={0}
+                                           
                                             endAdornment={
                                                 <InputAdornment position="end">
                                                     <div onClick={setMax} className="farm-card-action-input-btn">

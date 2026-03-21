@@ -1,10 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Slide } from "@material-ui/core";
+import { Box, Slide } from "@mui/material";
 import { IBondDetails, redeemBond } from "../../store/slices/bond-slice";
 import { useWeb3Context } from "../../hooks";
 import { trim, prettifySeconds, prettyVestingPeriod } from "../../helpers";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { IAllBondData } from "../../hooks/bonds";
 import { IUserBondDetails } from "../../store/slices/account-slice";
@@ -60,7 +60,7 @@ function BondRedeem({ bond }: IBondRedeem) {
         return prettifySeconds(bondingState.vestingTerm, "day");
     };
 
-    const displeyToken = chainID === Networks.AVAX ? "TIME" : "wMEMO";
+    const displeyToken = chainID === Networks.PULSE ? "TIME" : "wMEMO";
 
     return (
         <Box display="flex" flexDirection="column">
@@ -74,7 +74,7 @@ function BondRedeem({ bond }: IBondRedeem) {
                 >
                     <p>{txnButtonText(pendingTransactions, "redeem_bond_" + bond.name, "Claim")}</p>
                 </div>
-                {chainID === Networks.AVAX && (
+                {chainID === Networks.PULSE && (
                     <div
                         className="transaction-button bond-approve-btn"
                         onClick={() => {
@@ -96,7 +96,7 @@ function BondRedeem({ bond }: IBondRedeem) {
                         </p>
                     </div>
 
-                    {chainID === Networks.AVAX && (
+                    {chainID === Networks.PULSE && (
                         <div className="data-row">
                             <p className="bond-balance-title grey">Pending Rewards</p>
                             <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.interestDueWrapped, 8)} wMEMO`}</p>
@@ -110,7 +110,7 @@ function BondRedeem({ bond }: IBondRedeem) {
                         </p>
                     </div>
 
-                    {chainID === Networks.AVAX && (
+                    {chainID === Networks.PULSE && (
                         <div className="data-row">
                             <p className="bond-balance-title grey">Claimable Rewards</p>
                             <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.pendingPayoutWrapped, 8)} wMEMO`}</p>

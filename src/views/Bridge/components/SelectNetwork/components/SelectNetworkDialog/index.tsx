@@ -2,8 +2,8 @@ import React from "react";
 import "./select-network-dialog.scss";
 import { Networks } from "../../../../../../constants/blockchain";
 import { getChainList } from "../../../../../../helpers/get-chains";
-import { Box, Modal, Paper, SvgIcon, IconButton } from "@material-ui/core";
-import { ReactComponent as XIcon } from "../../../../../../assets/icons/x.svg";
+import { Box, Modal, Paper, SvgIcon, IconButton } from "@mui/material";
+import XIcon from "../../../../../../assets/icons/x.svg?react";
 import { useWeb3Context } from "../../../../../../hooks";
 
 interface ISelectNetworkDialog {

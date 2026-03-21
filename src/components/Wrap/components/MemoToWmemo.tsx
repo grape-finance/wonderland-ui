@@ -2,13 +2,13 @@ import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { IReduxState } from "../../../store/slices/state.interface";
 import { trim } from "../../../helpers/trim";
-import { ReactComponent as ArrowsIcon } from "../../../assets/icons/arrows.svg";
+import ArrowsIcon from "../../../assets/icons/arrows.svg?react";
 import { useWeb3Context } from "../../../hooks";
 import { calcWrapDetails, changeApproval, changeWrap } from "src/store/slices/wrap-slice";
 import { warning } from "src/store/slices/messages-slice";
 import { messages } from "../../../constants/messages";
-import { Skeleton } from "@material-ui/lab";
-import { IconButton, InputAdornment, OutlinedInput, SvgIcon } from "@material-ui/core";
+import { Skeleton } from "@mui/material";
+import { IconButton, InputAdornment, OutlinedInput, SvgIcon } from "@mui/material";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../../store/slices/pending-txns-slice";
 
 interface MemoToWmemoProps {

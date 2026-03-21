@@ -1,6 +1,6 @@
 import { IPost } from "../../../../hooks/useMedium";
 import "./post.scss";
-import { Link } from "@material-ui/core";
+import { Link } from "@mui/material";
 import moment from "moment";
 
 function Post({ title, link, pubDate, thumbnail, description }: IPost) {

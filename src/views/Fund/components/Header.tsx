@@ -1,5 +1,5 @@
-import { Grid } from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
+import { Grid } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import React, { useMemo, useState } from "react";
 import { DataSource } from "src/hooks/types";
 import { PieChart } from "react-minimal-pie-chart";

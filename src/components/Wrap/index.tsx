@@ -1,6 +1,6 @@
-import { Modal, Paper, SvgIcon, IconButton } from "@material-ui/core";
+import { Modal, Paper, SvgIcon, IconButton } from "@mui/material";
 import { useState } from "react";
-import { ReactComponent as XIcon } from "../../assets/icons/x.svg";
+import XIcon from "../../assets/icons/x.svg?react";
 import "./wrap.scss";
 import { useDispatch } from "react-redux";
 import { calcWrapDetails } from "../../store/slices/wrap-slice";

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import "./view-base.scss";
 import Header from "../Header";
-import { Hidden, makeStyles, useMediaQuery } from "@material-ui/core";
+import { Box, useMediaQuery } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import type { Theme } from "@mui/material/styles";
 import { DRAWER_WIDTH, TRANSITION_DURATION } from "../../constants/style";
 import MobileDrawer from "../Drawer/mobile-drawer";
 import Drawer from "../Drawer";
@@ -17,7 +19,7 @@ interface IViewBaseProps {
     children: React.ReactNode;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
     drawer: {
         [theme.breakpoints.up("md")]: {
             width: DRAWER_WIDTH,
@@ -62,12 +64,12 @@ function ViewBase({ children }: IViewBaseProps) {
             <Messages />
             <Header drawe={!isSmallerScreen} handleDrawerToggle={handleDrawerToggle} />
             <div className={classes.drawer}>
-                <Hidden mdUp>
+                <Box sx={{ display: { md: "none" } }}>
                     <MobileDrawer mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
-                </Hidden>
-                <Hidden smDown>
+                </Box>
+                <Box sx={{ display: { xs: "none", md: "block" } }}>
                     <Drawer />
-                </Hidden>
+                </Box>
             </div>
             <div className={`${classes.content} ${isSmallerScreen && classes.contentShift}`}>
                 {!isSmallerScreen && (
@@ -80,9 +82,9 @@ function ViewBase({ children }: IViewBaseProps) {
                         <p>{cubesImage}</p>
                     </div>
                 )}
-                {/* {chainID === Networks.AVAX && <LiquidityBanner />} */}
-                {chainID === Networks.AVAX && <AirdropBanner />}
-                {chainID === Networks.AVAX && <InfoBanner />}
+                {/* {chainID === Networks.PULSE && <LiquidityBanner />} */}
+                {chainID === Networks.PULSE && <AirdropBanner />}
+                {chainID === Networks.PULSE && <InfoBanner />}
                 {children}
             </div>
         </div>

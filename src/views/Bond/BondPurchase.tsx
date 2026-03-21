@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, OutlinedInput, InputAdornment, Slide, FormControl } from "@material-ui/core";
+import { Box, OutlinedInput, InputAdornment, Slide, FormControl } from "@mui/material";
 import { trim, prettifySeconds } from "../../helpers";
 import { changeApproval, bondAsset, calcBondDetails, calcBondV2Details } from "../../store/slices/bond-slice";
 import { useWeb3Context } from "../../hooks";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { IAllBondData } from "../../hooks/bonds";
 import useDebounce from "../../hooks/debounce";
@@ -135,7 +135,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
     const isShowZap = bond.disableZap ? false : !bond.deprecated;
 
-    const displeyToken = chainID === Networks.AVAX ? "TIME" : "wMEMO";
+    const displeyToken = chainID === Networks.PULSE ? "TIME" : "wMEMO";
 
     return (
         <Box display="flex" flexDirection="column">
@@ -154,7 +154,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                         type="number"
                         value={quantity}
                         onChange={e => setQuantity(e.target.value)}
-                        labelWidth={0}
+                       
                         className="bond-input"
                         endAdornment={
                             <InputAdornment position="end">
@@ -181,7 +181,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                             await onBond();
                         }}
                     >
-                        <p>{txnButtonText(pendingTransactions, "bond_" + bond.name, bond.deprecated ? "Deprecated" : chainID === Networks.AVAX ? "Mint" : "Buy wMEMO")}</p>
+                        <p>{txnButtonText(pendingTransactions, "bond_" + bond.name, bond.deprecated ? "Deprecated" : chainID === Networks.PULSE ? "Mint" : "Buy wMEMO")}</p>
                     </div>
                 ) : (
                     <div
@@ -206,7 +206,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
                 {!hasAllowance() && !useAvax && (
                     <div className="help-text">
-                        {chainID === Networks.AVAX ? (
+                        {chainID === Networks.PULSE ? (
                             <p className="help-text-desc">
                                 Note: The "Approve" transaction is only needed when minting for the first time; subsequent minting only requires you to perform the "Mint"
                                 transaction.
@@ -243,7 +243,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                         </p>
                     </div>
 
-                    {chainID === Networks.AVAX && (
+                    {chainID === Networks.PULSE && (
                         <div className="data-row">
                             <p className="bond-balance-title grey">You Will Get</p>
                             <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.bondQuoteWrapped, 8)} wMEMO`}</p>
@@ -257,7 +257,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                         </p>
                     </div>
 
-                    {chainID === Networks.AVAX && (
+                    {chainID === Networks.PULSE && (
                         <div className="data-row">
                             <p className="bond-balance-title grey">Max You Can Buy</p>
                             <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.maxBondPriceWrapped, 8)} wMEMO`}</p>

@@ -287,7 +287,7 @@ export const calculateUserBondDetails = createAsyncThunk("account/calculateUserB
     bondMaturationBlock = Number(bondDetails.vesting) + lastTime;
     pendingPayout = await bondContract.pendingPayoutFor(address);
 
-    if (networkID === Networks.AVAX) {
+    if (networkID === Networks.PULSE) {
         pendingPayoutWrapped = (await wMemoContract.MEMOTowMEMO(pendingPayout)) / Math.pow(10, 18);
     }
 

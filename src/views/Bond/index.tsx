@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { trim } from "../../helpers";
-import { Grid, Backdrop, Box, Fade } from "@material-ui/core";
+import { Grid, Backdrop, Box, Fade } from "@mui/material";
 import TabPanel from "../../components/TabPanel";
 import BondHeader from "./BondHeader";
 import BondRedeem from "./BondRedeem";
 import BondPurchase from "./BondPurchase";
 import "./bond.scss";
 import { usePathForNetwork, useWeb3Context } from "../../hooks";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { IAllBondData } from "../../hooks/bonds";
 import classnames from "classnames";
@@ -54,7 +54,7 @@ function Bond({ bond }: IBondProps) {
                             {/* @ts-ignore */}
                             <Box direction="row" className="bond-price-data-row">
                                 <div className="bond-price-data">
-                                    <p className="bond-price-data-title">{chainID === Networks.AVAX ? "Mint Price" : "Treasury sale price"}</p>
+                                    <p className="bond-price-data-title">{chainID === Networks.PULSE ? "Mint Price" : "Treasury sale price"}</p>
                                     <p className="bond-price-data-value">
                                         {isBondLoading ? (
                                             <Skeleton />
@@ -65,21 +65,21 @@ function Bond({ bond }: IBondProps) {
                                         )}
                                     </p>
                                 </div>
-                                {chainID === Networks.AVAX && (
+                                {chainID === Networks.PULSE && (
                                     <div className="bond-price-data">
                                         <p className="bond-price-data-title">wMEMO Price</p>
                                         <p className="bond-price-data-value">{isBondLoading ? <Skeleton /> : `$${trim(wmemoPrice, 2)}`}</p>
                                     </div>
                                 )}
                                 <div className="bond-price-data">
-                                    <p className="bond-price-data-title">{chainID === Networks.AVAX ? "TIME Price" : "wMEMO Price"}</p>
+                                    <p className="bond-price-data-title">{chainID === Networks.PULSE ? "TIME Price" : "wMEMO Price"}</p>
                                     <p className="bond-price-data-value">{isBondLoading ? <Skeleton /> : `$${trim(bond.marketPrice, 2)}`}</p>
                                 </div>
                             </Box>
 
                             <div className="bond-one-table">
                                 <div className={classnames("bond-one-table-btn", { active: !view })} onClick={changeView(0)}>
-                                    <p>{chainID === Networks.AVAX ? "Mint" : "Treasury sales"}</p>
+                                    <p>{chainID === Networks.PULSE ? "Mint" : "Treasury sales"}</p>
                                 </div>
                                 <div className={classnames("bond-one-table-btn", { active: view })} onClick={changeView(1)}>
                                     <p>Redeem</p>

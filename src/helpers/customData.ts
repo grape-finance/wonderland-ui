@@ -38,9 +38,9 @@ async function getBsgg() {
     const chainUrl = "https://static.debank.com/image/chain/logo_url/ftm/700fca32e0ee6811686d72b99cc67713.png";
     const price = await getBsggMarketPrice();
     const chain = "fantom";
-    const addresses = getAddresses(Networks.FANTOM);
+    const addresses = getAddresses(Networks.PULSE);
 
-    const tokenBalances = await Promise.all(ADRESSES_LIST.map(address => getTokenBalance(address, Networks.FANTOM, addresses.BSGG_ADDRESS)));
+    const tokenBalances = await Promise.all(ADRESSES_LIST.map(address => getTokenBalance(address, Networks.PULSE, addresses.BSGG_ADDRESS)));
     const data: IData[] = tokenBalances.map(balance => ({
         name,
         images,
@@ -58,7 +58,7 @@ async function getBsgg() {
 async function getMimBsggLpFtm(): Promise<IData[]> {
     const daoAddress = "0xB6b80F4ea8FB4117928D3C819e8aC6F1A3837baF";
 
-    const provider = simpleProvider(Networks.FANTOM);
+    const provider = simpleProvider(Networks.PULSE);
     const lpContract = new ethers.Contract("0x23320d8f931a52232f1dd9217b25721194cf6812", LpReserveContract, provider);
 
     const lpBalance = await lpContract.balanceOf(daoAddress);

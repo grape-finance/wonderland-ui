@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Fade, Popper } from "@material-ui/core";
+import { Fade, Popper } from "@mui/material";
 import "./network-manu.scss";
 import { useWeb3Context } from "../../../hooks";
 import { getChainInfo, getChainList } from "../../../helpers/get-chains";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getAddresses, TOKEN_DECIMALS, DEFAULD_NETWORK } from "../../../constants";
-import { Link, Fade, Popper } from "@material-ui/core";
+import { Link, Fade, Popper } from "@mui/material";
 import "./time-menu.scss";
 
 const addTokenToWallet =

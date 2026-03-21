@@ -39,7 +39,7 @@ export const loadAppDetails = createAsyncThunk("app/loadAppDetails", async ({ ne
     const marketCap = Number(ethers.utils.formatEther(wmemo.totalSupply)) * wMemoPrice;
     const stakingTVL = Number(ethers.utils.formatEther(wmemo.circulation)) * wMemoPrice;
 
-    if (networkID !== Networks.AVAX) {
+    if (networkID !== Networks.PULSE) {
         return { wMemoMarketPrice: wMemoPrice, treasuryBalance: total, currentBlock, currentBlockTime, zapper, marketCap, stakingTVL, rfvWmemo };
     }
 

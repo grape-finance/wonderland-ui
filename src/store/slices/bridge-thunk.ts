@@ -84,7 +84,7 @@ export const bridgeSwap = createAsyncThunk("bridge/bridgeSwap", async ({ provide
     let swapTx;
 
     try {
-        if (networkID === Networks.AVAX) {
+        if (networkID === Networks.PULSE) {
             swapTx = await anyswapContract.anySwapOutUnderlying(addresses.ANY_WMEMO_ADDRESS, address, valueInWei, BigNumber.from(toChain));
         } else {
             swapTx = await anyswapContract["anySwapOut(address,address,uint256,uint256)"](addresses.WMEMO_ADDRESS, address, valueInWei, BigNumber.from(toChain));

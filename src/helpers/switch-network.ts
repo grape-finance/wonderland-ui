@@ -26,7 +26,7 @@ const addChainRequest = (chain: Networks) => {
     });
 };
 
-export const swithNetwork = async (chain = Networks.AVAX) => {
+export const swithNetwork = async (chain = Networks.PULSE) => {
     if (window.ethereum) {
         try {
             await switchRequest(chain);

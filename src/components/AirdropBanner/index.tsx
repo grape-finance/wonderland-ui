@@ -3,8 +3,8 @@ import React, { useCallback, useState, useEffect } from "react";
 import axios from "axios";
 
 import "./airdrop-banner.scss";
-import { ReactComponent as xIcon } from "../../assets/icons/x.svg";
-import { SvgIcon } from "@material-ui/core";
+import xIcon from "../../assets/icons/x.svg?react";
+import { SvgIcon } from "@mui/material";
 import { useAddress, useWeb3Context } from "../../hooks";
 
 import { AirdropContract } from "../../abi";

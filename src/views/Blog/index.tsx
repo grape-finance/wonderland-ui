@@ -1,4 +1,4 @@
-import { Zoom } from "@material-ui/core";
+import { Zoom } from "@mui/material";
 import React from "react";
 import "./blog.scss";
 import { useMedium } from "../../hooks/useMedium";

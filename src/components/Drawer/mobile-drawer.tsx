@@ -1,9 +1,10 @@
-import { makeStyles } from "@material-ui/core/styles";
-import { Drawer } from "@material-ui/core";
+import { makeStyles } from "@mui/styles";
+import type { Theme } from "@mui/material/styles";
+import { Drawer } from "@mui/material";
 import DrawerContent from "./drawer-content";
 import { DRAWER_WIDTH } from "../../constants/style";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
     drawer: {
         [theme.breakpoints.up("md")]: {
             width: DRAWER_WIDTH,

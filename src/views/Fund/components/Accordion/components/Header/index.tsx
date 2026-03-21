@@ -1,4 +1,4 @@
-import { Switch } from "@material-ui/core";
+import { Switch } from "@mui/material";
 import ArrowDown from "../../../../../../assets/icons/arrow-down.svg";
 import classNames from "classnames";
 

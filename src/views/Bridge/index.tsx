@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from "react";
 import "./bridge.scss";
-import { Grid, InputAdornment, OutlinedInput, Zoom } from "@material-ui/core";
+import { Grid, InputAdornment, OutlinedInput, Zoom } from "@mui/material";
 import { useWeb3Context } from "../../hooks";
 import { useSelector, useDispatch } from "react-redux";
 import { IReduxState } from "../../store/slices/state.interface";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { trim } from "../../helpers";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
 import wMemoIcon from "../../assets/tokens/MEMO.png";
@@ -34,7 +34,7 @@ function Bridge() {
         return state.account.bridge && state.account.bridge.wmemo;
     });
 
-    const hasAllowance = useCallback(() => (chainID === Networks.AVAX ? wMemoAllowance > 0 : true), [wMemoAllowance, chainID]);
+    const hasAllowance = useCallback(() => (chainID === Networks.PULSE ? wMemoAllowance > 0 : true), [wMemoAllowance, chainID]);
 
     const defaultToChain = useMemo(() => Number(getChainList(chainID)[0].chainId), [chainID]);
 
@@ -111,7 +111,7 @@ function Bridge() {
                                                 className="bridge-card-action-input"
                                                 value={quantity}
                                                 onChange={e => setQuantity(e.target.value)}
-                                                labelWidth={0}
+                                               
                                                 startAdornment={
                                                     <InputAdornment position="start">
                                                         <div className="bridge-card-action-input-token-wrap">

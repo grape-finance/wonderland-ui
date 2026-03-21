@@ -1,6 +1,7 @@
-import { AppBar, Toolbar } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { AppBar, Toolbar } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import type { Theme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import MenuIcon from "../../assets/icons/hamburger.svg";
 import TimeMenu from "./time-menu";
 import ConnectButton from "./connect-button";
@@ -16,7 +17,7 @@ interface IHeader {
     drawe: boolean;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
     appBar: {
         [theme.breakpoints.up("sm")]: {
             width: "100%",
@@ -58,8 +59,8 @@ function Header({ handleDrawerToggle, drawe }: IHeader) {
                         <img src={MenuIcon} alt="" />
                     </div>
                     <div className="dapp-topbar-btns-wrap">
-                        {!isWrapShow && chainID === Networks.AVAX && <TimeMenu />}
-                        {chainID === Networks.AVAX && <WrapButton />}
+                        {!isWrapShow && chainID === Networks.PULSE && <TimeMenu />}
+                        {chainID === Networks.PULSE && <WrapButton />}
                         {!isVerySmallScreen && <NetworkMenu />}
                         <ConnectButton />
                     </div>
