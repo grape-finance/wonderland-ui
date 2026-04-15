@@ -43,13 +43,13 @@ function App() {
             loadApp(loadProvider);
         }
 
-        // if (whichDetails === "userBonds" && address && connected) {
-        //     bonds.map(bond => {
-        //         if (bond.getAvailability(chainID)) {
-        //             dispatch(calculateUserBondDetails({ address, bond, provider, networkID: chainID }));
-        //         }
-        //     });
-        // }
+        if (whichDetails === "userBonds" && address && connected) {
+            bonds.map(bond => {
+                if (bond.getAvailability(chainID)) {
+                    dispatch(calculateUserBondDetails({ address, bond, provider, networkID: chainID }));
+                }
+            });
+        }
 
         // if (whichDetails === "userTokens" && address && connected && chainID === Networks.PULSE) {
         //     tokens.map(token => {
@@ -61,20 +61,20 @@ function App() {
     const loadApp = useCallback(
         loadProvider => {
             dispatch(loadAppDetails({ networkID: chainID, provider: loadProvider, checkWrongNetwork }));
-            // bonds.map(bond => {
-            //     if (bond.getAvailability(chainID)) {
-            //         if (bond.v2Bond) {
-            //             dispatch(calcBondV2Details({ bond, value: null, provider: loadProvider, networkID: chainID }));
-            //         } else {
-            //             dispatch(calcBondDetails({ bond, value: null, provider: loadProvider, networkID: chainID }));
-            //         }
-            //     }
-            // });
-            if (chainID === Networks.PULSE) {
+            bonds.map(bond => {
+                if (bond.getAvailability(chainID)) {
+                    if (bond.v2Bond) {
+                        dispatch(calcBondV2Details({ bond, value: null, provider: loadProvider, networkID: chainID }));
+                    } else {
+                        dispatch(calcBondDetails({ bond, value: null, provider: loadProvider, networkID: chainID }));
+                    }
+                }
+            });
+            if (chainID === Networks.PULSE || chainID === Networks.PULSE_TESTNET) {
                 dispatch(calcWrapPrice({ networkID: chainID, provider: loadProvider }));
-                // tokens.map(token => {
-                //     dispatch(calculateUserTokenDetails({ address: "", token, provider, networkID: chainID }));
-                // });
+            }
+            // Farm rewards only on mainnet (Farm contract not deployed on testnet)
+            if (chainID === Networks.PULSE) {
                 dispatch(calculateUserRewardDetails({ networkID: chainID, address, provider: loadProvider }));
             }
         },
@@ -102,8 +102,7 @@ function App() {
         if (walletChecked) {
             loadDetails("app");
             loadDetails("account");
-            // loadDetails("userBonds");
-            // loadDetails("userTokens");
+            loadDetails("userBonds");
         }
     }, [walletChecked, chainID]);
 
@@ -111,8 +110,7 @@ function App() {
         if (connected) {
             loadDetails("app");
             loadDetails("account");
-            // loadDetails("userBonds");
-            // loadDetails("userTokens");
+            loadDetails("userBonds");
         }
     }, [connected, chainID]);
 

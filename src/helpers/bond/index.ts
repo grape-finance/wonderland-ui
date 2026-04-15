@@ -8,6 +8,11 @@ import MimTimeIcon from "../../assets/tokens/TIME-MIM.svg";
 import AvaxTimeIcon from "../../assets/tokens/TIME-AVAX.svg";
 import EthIcon from "../../assets/tokens/WETH.e.png";
 import wMemoMimIcon from "../../assets/tokens/WMEMO-MIM.png";
+// Testnet bonds reuse the closest visual match from existing assets
+import UsdcIcon from "../../assets/tokens/MIM.svg";
+import WplsIcon from "../../assets/tokens/AVAX.svg";
+import TimeUsdcLpIcon from "../../assets/tokens/TIME-MIM.svg";
+import TimeWplsLpIcon from "../../assets/tokens/TIME-AVAX.svg";
 
 import { StableBondContract, LpBondContract, WavaxBondContract, StableReserveContract, LpReserveContract, WethBondContract, ProBondContract } from "../../abi";
 import { getWmemoMarketPrice } from "../get-wmemo-price";
@@ -196,4 +201,88 @@ export const wmemoMim = new NotTimeLpBond({
     tokensInStrategy: "40248760911630751941101",
 });
 
-export default [mim, wavax, weth, avaxTime, mimTime, wmemoMim, mimPro];
+// ─── PulseChain Testnet bonds ────────────────────────────────────────────────
+
+export const usdcBond = new StableBond({
+    name: "usdc",
+    displayName: "USDC",
+    bondToken: "USDC",
+    bondIconSvg: UsdcIcon,
+    bondContractABI: StableBondContract,
+    reserveContractAbi: StableReserveContract,
+    networkAddrs: {
+        [Networks.PULSE_TESTNET]: {
+            bondAddress: "0x9D9747Ec64523E65132fEe1D1c93D15e8de133C3",
+            reserveAddress: "0xf43e6c627716c648bEc5873384dA94d3E33A4a25",
+        },
+    },
+    v2Bond: false,
+    deprecated: false,
+    isAvailable: {
+        [Networks.PULSE_TESTNET]: true,
+    },
+});
+
+export const wplsBond = new CustomBond({
+    name: "wpls",
+    displayName: "WPLS",
+    bondToken: "WPLS",
+    bondIconSvg: WplsIcon,
+    bondContractABI: WavaxBondContract,
+    reserveContractAbi: StableReserveContract,
+    networkAddrs: {
+        [Networks.PULSE_TESTNET]: {
+            bondAddress: "0x0603145F090BC9dA24D03EacCf1C4E63Ef75B9B1",
+            reserveAddress: "0x70499adEBB11Efd915E3b69E700c331778628707",
+        },
+    },
+    v2Bond: false,
+    deprecated: false,
+    isAvailable: {
+        [Networks.PULSE_TESTNET]: true,
+    },
+});
+
+export const timeUsdcLpBond = new LPBond({
+    name: "time_usdc_lp",
+    displayName: "TIME-USDC LP",
+    bondToken: "USDC",
+    bondIconSvg: TimeUsdcLpIcon,
+    bondContractABI: LpBondContract,
+    reserveContractAbi: LpReserveContract,
+    networkAddrs: {
+        [Networks.PULSE_TESTNET]: {
+            bondAddress: "0x2367247b680F5C998a4C5785d17c4CDC2cD35D77",
+            reserveAddress: "0x9d070B1dA73120C28006a3e3f4DB2b3598646fF1",
+        },
+    },
+    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xAf5123ED5E87935821e77449Ff0bb00E673033c3",
+    v2Bond: false,
+    deprecated: false,
+    isAvailable: {
+        [Networks.PULSE_TESTNET]: true,
+    },
+});
+
+export const timeWplsLpBond = new CustomLPBond({
+    name: "time_wpls_lp",
+    displayName: "TIME-WPLS LP",
+    bondToken: "WPLS",
+    bondIconSvg: TimeWplsLpIcon,
+    bondContractABI: LpBondContract,
+    reserveContractAbi: LpReserveContract,
+    networkAddrs: {
+        [Networks.PULSE_TESTNET]: {
+            bondAddress: "0x11389d965b03d1Ed5593404205695a44A407da91",
+            reserveAddress: "0x67c4659D6fE88d14508Ad8900D6305C51eF6AcF7",
+        },
+    },
+    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xAf5123ED5E87935821e77449Ff0bb00E673033c3",
+    v2Bond: false,
+    deprecated: false,
+    isAvailable: {
+        [Networks.PULSE_TESTNET]: true,
+    },
+});
+
+export default [mim, wavax, weth, avaxTime, mimTime, wmemoMim, mimPro, usdcBond, wplsBond, timeUsdcLpBond, timeWplsLpBond];

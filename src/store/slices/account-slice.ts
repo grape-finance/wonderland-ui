@@ -89,8 +89,12 @@ export const getStaking = createAsyncThunk("account/getStaking", async ({ addres
     const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, MemoTokenContract, provider);
     const memo = await memoContract.allowance(address, addresses.STAKING_ADDRESS);
 
-    const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
-    const wMemo = await wmemoContract.allowance(address, addresses.FARM_ADDRESS);
+    // FARM_ADDRESS may not be deployed on all networks (e.g. testnet)
+    let wMemo = ethers.BigNumber.from(0);
+    if (addresses.WMEMO_ADDRESS && addresses.FARM_ADDRESS) {
+        const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+        wMemo = await wmemoContract.allowance(address, addresses.FARM_ADDRESS);
+    }
 
     return {
         staking: {

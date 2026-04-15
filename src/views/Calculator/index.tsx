@@ -50,12 +50,13 @@ function Calculator() {
     }, [wmemoAmount]);
 
     const calcNewBalance = () => {
-        let value = parseFloat(rewardYield) / 100;
-        value = Math.pow(value - 1, 1 / (365 * 3)) - 1 || 0;
+        const apy = parseFloat(rewardYield) / 100;
+        // Convert APY to per-epoch rate: r = (1 + APY)^(1/epochs_per_year) - 1
+        const perEpochRate = Math.pow(1 + apy, 1 / (365 * 3)) - 1 || 0;
         let balance = Number(wmemoAmount);
         balance = balance * wrapPrice;
         for (let i = 0; i < days * 3; i++) {
-            balance += balance * value;
+            balance += balance * perEpochRate;
         }
         return balance;
     };

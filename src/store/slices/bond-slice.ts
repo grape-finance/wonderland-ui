@@ -120,12 +120,25 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
 
     maxBondPrice = maxBondPrice / Math.pow(10, 9);
 
-    const { timePrice, wMemoPrice } = await getMarketPrice();
-
-    let marketPrice = timePrice * Math.pow(10, 9);
-
-    const mimPrice = getTokenPrice("MIM");
-    marketPrice = (marketPrice / Math.pow(10, 9)) * mimPrice;
+    // For testnet, derive TIME price directly from the staking index so we
+    // don't need to call the external Wonderland API (which tracks mainnet only).
+    let marketPrice: number;
+    let wMemoPrice: number;
+    let mimPrice: number = getTokenPrice("MIM");
+    if (networkID === Networks.PULSE_TESTNET) {
+        const { StakingContract: StakingABI } = await import("../../abi");
+        const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingABI, provider);
+        const currentIndex = await stakingContract.index();
+        const indexFormatted = Number(ethers.utils.formatUnits(currentIndex, "gwei"));
+        // TIME launch price = $10 on testnet
+        marketPrice = 10;
+        wMemoPrice = indexFormatted * 10;
+    } else {
+        const fetched = await getMarketPrice();
+        wMemoPrice = fetched.wMemoPrice;
+        const rawMarketPrice = fetched.timePrice * Math.pow(10, 9);
+        marketPrice = (rawMarketPrice / Math.pow(10, 9)) * mimPrice;
+    }
 
     try {
         bondPrice = await bondContract.bondPriceInUSD();
