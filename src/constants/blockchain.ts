@@ -22,7 +22,7 @@ export const NetworksInfo = {
             symbol: "PLS",
             decimals: 18,
         },
-        img: "/BBlogo-purple-main-circle.png",
+        img: "/pulse-logo.png",
     },
     [Networks.PULSE_TESTNET]: {
         chainId: "0x3AF",
@@ -35,6 +35,6 @@ export const NetworksInfo = {
             symbol: "tPLS",
             decimals: 18,
         },
-        img: "/BBlogo-purple-main-circle.png",
+        img: "/pulse-logo.png",
     },
 };
