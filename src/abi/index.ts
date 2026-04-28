@@ -24,5 +24,6 @@ export { abi as FarmContract } from "./FarmContract.json";
 
 export { abi as AirdropContract } from "./AirdropContract.json";
 export { abi as MemoExchangeAbi } from "./MemoExchangeAbi.json";
+export { abi as StakingDistributorContract } from "./StakingDistributorContract.json";
 export { abi as ConvexStakingWrapperAbra } from "./ConvexStakingWrapperAbra.json";
 export { abi as CurVyper_contract } from "./CurVyper_contract.json";

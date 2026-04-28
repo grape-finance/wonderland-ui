@@ -12,10 +12,7 @@ import { Skeleton } from "@mui/material";
 import { IReduxState } from "../../store/slices/state.interface";
 import { IAllBondData } from "../../hooks/bonds";
 import classnames from "classnames";
-import { wavax, weth } from "../../helpers/bond";
 import { useHistory } from "react-router-dom";
-import { Networks } from "../../constants/blockchain";
-
 interface IBondProps {
     bond: IAllBondData;
 }
@@ -54,32 +51,28 @@ function Bond({ bond }: IBondProps) {
                             {/* @ts-ignore */}
                             <Box direction="row" className="bond-price-data-row">
                                 <div className="bond-price-data">
-                                    <p className="bond-price-data-title">{chainID === Networks.PULSE ? "Mint Price" : "Treasury sale price"}</p>
+                                    <p className="bond-price-data-title">Mint Price</p>
                                     <p className="bond-price-data-value">
                                         {isBondLoading ? (
                                             <Skeleton />
-                                        ) : bond.isLP || bond.name === wavax.name || bond.name === weth.name ? (
-                                            `$${trim(bond.deprecated ? 0 : bond.bondPrice, 2)}`
                                         ) : (
-                                            `${trim(bond.deprecated ? 0 : bond.bondPrice, 2)} MIM`
+                                            `$${trim(bond.deprecated ? 0 : bond.bondPrice, 2)}`
                                         )}
                                     </p>
                                 </div>
-                                {chainID === Networks.PULSE && (
-                                    <div className="bond-price-data">
-                                        <p className="bond-price-data-title">wMEMO Price</p>
-                                        <p className="bond-price-data-value">{isBondLoading ? <Skeleton /> : `$${trim(wmemoPrice, 2)}`}</p>
-                                    </div>
-                                )}
                                 <div className="bond-price-data">
-                                    <p className="bond-price-data-title">{chainID === Networks.PULSE ? "TIME Price" : "wMEMO Price"}</p>
+                                    <p className="bond-price-data-title">wMEMO Price</p>
+                                    <p className="bond-price-data-value">{isBondLoading ? <Skeleton /> : `$${trim(wmemoPrice, 2)}`}</p>
+                                </div>
+                                <div className="bond-price-data">
+                                    <p className="bond-price-data-title">TIME Price</p>
                                     <p className="bond-price-data-value">{isBondLoading ? <Skeleton /> : `$${trim(bond.marketPrice, 2)}`}</p>
                                 </div>
                             </Box>
 
                             <div className="bond-one-table">
                                 <div className={classnames("bond-one-table-btn", { active: !view })} onClick={changeView(0)}>
-                                    <p>{chainID === Networks.PULSE ? "Mint" : "Treasury sales"}</p>
+                                    <p>Mint</p>
                                 </div>
                                 <div className={classnames("bond-one-table-btn", { active: view })} onClick={changeView(1)}>
                                     <p>Redeem</p>

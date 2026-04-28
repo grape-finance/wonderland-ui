@@ -19,6 +19,7 @@ export const loadTokenPrices = async () => {
         cache["WETH"] = data["weth"].usd;
         cache["BSGG"] = data["betswap-gg"].usd;
         cache["WBTC"] = data["bitcoin"].usd;
+        cache["USDC"] = 1;
     } catch (e) {
         console.warn("Coingecko price fetch failed – using cached defaults:", e);
     }

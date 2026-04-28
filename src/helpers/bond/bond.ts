@@ -16,6 +16,16 @@ export interface BondOpts {
     readonly isAvailable: Available;
     readonly v2Bond: boolean;
     readonly disableZap?: boolean;
+    /** Decimals of the reserve (principal) token. Defaults to 18. Used for
+     *  parsing user input amounts before calling deposit() and for formatting
+     *  the token balance displayed in the UI. USDC = 6, everything else = 18. */
+    readonly reserveDecimals?: number;
+    /**
+     * Set to true for bonds that use EthBondDepository (e.g. WPLS / native-asset bonds).
+     * EthBondDepository.bondPriceInUSD() = bondPrice() × assetPrice(oracle) × 1e6
+     * so the correct USD display formula is  bondPriceRaw / 1e16  (not formatUnits(..., 18)).
+     */
+    readonly isEthBond?: boolean;
 }
 
 export abstract class Bond {
@@ -34,6 +44,8 @@ export abstract class Bond {
 
     public readonly customToken?: boolean;
     public readonly disableZap?: boolean;
+    public readonly reserveDecimals: number;
+    public readonly isEthBond: boolean;
 
     // The following two fields will differ on how they are set depending on bond type
     public abstract isLP: boolean;
@@ -55,6 +67,8 @@ export abstract class Bond {
         this.isAvailable = bondOpts.isAvailable;
         this.v2Bond = bondOpts.v2Bond;
         this.disableZap = bondOpts.disableZap;
+        this.reserveDecimals = bondOpts.reserveDecimals ?? 18;
+        this.isEthBond = bondOpts.isEthBond ?? false;
     }
 
     public getAvailability(networkID: Networks) {

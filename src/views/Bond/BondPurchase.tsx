@@ -12,8 +12,6 @@ import useDebounce from "../../hooks/debounce";
 import { messages } from "../../constants/messages";
 import { warning } from "../../store/slices/messages-slice";
 import Zapin from "./Zapin";
-import { Networks } from "../../constants/blockchain";
-
 interface IBondPurchaseProps {
     bond: IAllBondData;
     slippage: number;
@@ -27,6 +25,10 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
     const [useAvax, setUseAvax] = useState(false);
 
     const [showError, setShowError] = useState(false);
+    const [tooSmall, setTooSmall] = useState(false);
+
+    // Minimum payout enforced by the contract: 0.01 TIME for v1, 0.0001 for v2
+    const MIN_PAYOUT = bond.v2Bond ? 0.0001 : 0.01;
 
     const isBondLoading = useSelector<IReduxState, boolean>(state => state.bonding.loading ?? true);
     const [zapinOpen, setZapinOpen] = useState(false);
@@ -43,6 +45,10 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
         if (await checkWrongNetwork()) return;
         if (bond.deprecated || bond.soldOut) return;
         if (Number(quantity) > bond.maxBondPriceToken) return;
+        if (tooSmall) {
+            dispatch(warning({ text: `Bond too small — minimum payout is ${MIN_PAYOUT} TIME. Please increase the amount.` }));
+            return;
+        }
         if (quantity === "") {
             dispatch(warning({ text: messages.before_minting }));
             //@ts-ignore
@@ -113,6 +119,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
         }
 
         setShowError(Number(quantity) > bond.maxBondPriceToken);
+        setTooSmall(Number(quantity) > 0 && bond.bondQuote > 0 && bond.bondQuote < MIN_PAYOUT);
     }, [bondDetailsDebounce]);
 
     const onSeekApproval = async () => {
@@ -135,7 +142,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
     const isShowZap = bond.disableZap ? false : !bond.deprecated;
 
-    const displeyToken = chainID === Networks.PULSE ? "TIME" : "wMEMO";
+    const displeyToken = "TIME";
 
     return (
         <Box display="flex" flexDirection="column">
@@ -169,6 +176,11 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                             <p>The value cannot be greater than {trim(bond.maxBondPriceToken, 8)}</p>
                         </div>
                     )}
+                    {tooSmall && !showError && (
+                        <div className="bond-input-error">
+                            <p>Bond too small — you will receive {trim(bond.bondQuote, 4)} TIME but the minimum is {MIN_PAYOUT} TIME. Enter a larger amount.</p>
+                        </div>
+                    )}
                 </FormControl>
                 {hasAllowance() || useAvax ? (
                     <div
@@ -181,7 +193,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                             await onBond();
                         }}
                     >
-                        <p>{txnButtonText(pendingTransactions, "bond_" + bond.name, bond.deprecated ? "Deprecated" : chainID === Networks.PULSE ? "Mint" : "Buy wMEMO")}</p>
+                        <p>{txnButtonText(pendingTransactions, "bond_" + bond.name, bond.deprecated ? "Deprecated" : "Mint")}</p>
                     </div>
                 ) : (
                     <div
@@ -206,17 +218,10 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
                 {!hasAllowance() && !useAvax && (
                     <div className="help-text">
-                        {chainID === Networks.PULSE ? (
-                            <p className="help-text-desc">
-                                Note: The "Approve" transaction is only needed when minting for the first time; subsequent minting only requires you to perform the "Mint"
-                                transaction.
-                            </p>
-                        ) : (
-                            <p className="help-text-desc">
-                                Note: The "Approve" transaction is only needed when Wmemo purchasing for the first time; subsequent purchases only requires you to perform the
-                                purchase transaction
-                            </p>
-                        )}
+                        <p className="help-text-desc">
+                            Note: The "Approve" transaction is only needed when minting for the first time; subsequent minting only requires you to perform the "Mint"
+                            transaction.
+                        </p>
                     </div>
                 )}
             </Box>
@@ -243,12 +248,10 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                         </p>
                     </div>
 
-                    {chainID === Networks.PULSE && (
-                        <div className="data-row">
-                            <p className="bond-balance-title grey">You Will Get</p>
-                            <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.bondQuoteWrapped, 8)} wMEMO`}</p>
-                        </div>
-                    )}
+                    <div className="data-row">
+                        <p className="bond-balance-title grey">You Will Get</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.bondQuoteWrapped, 8)} wMEMO`}</p>
+                    </div>
 
                     <div className={`data-row`}>
                         <p className="bond-balance-title">Max You Can Buy</p>
@@ -257,12 +260,10 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                         </p>
                     </div>
 
-                    {chainID === Networks.PULSE && (
-                        <div className="data-row">
-                            <p className="bond-balance-title grey">Max You Can Buy</p>
-                            <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.maxBondPriceWrapped, 8)} wMEMO`}</p>
-                        </div>
-                    )}
+                    <div className="data-row">
+                        <p className="bond-balance-title grey">Max You Can Buy</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.maxBondPriceWrapped, 8)} wMEMO`}</p>
+                    </div>
 
                     <div className="data-row">
                         <p className="bond-balance-title">ROI</p>

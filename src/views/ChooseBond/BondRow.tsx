@@ -7,12 +7,24 @@ import { Skeleton } from "@mui/material";
 import { IAllBondData } from "../../hooks/bonds";
 import classNames from "classnames";
 
+/**
+ * Format a bond price with enough decimal places to be meaningful.
+ * Prices < $0.01 (e.g. WPLS at $0.0018) need more than 2 decimal places.
+ */
+function trimPrice(price: number): string {
+    if (!price || price <= 0) return "0.00";
+    if (price >= 1)    return trim(price, 2);
+    if (price >= 0.01) return trim(price, 4);
+    if (price >= 0.0001) return trim(price, 6);
+    return price.toFixed(8);
+}
+
 interface IBondProps {
     bond: IAllBondData;
 }
 
 export function BondDataCard({ bond }: IBondProps) {
-    const isBondLoading = bond.deprecated ? false : !bond.bondPrice ?? true;
+    const isBondLoading = bond.deprecated ? false : bond.bondPrice === undefined || bond.bondPrice === null;
 
     return (
         <Slide direction="up" in={true}>
@@ -35,7 +47,7 @@ export function BondDataCard({ bond }: IBondProps) {
                     <p className="bond-name-title">Price</p>
                     <p className={classNames("bond-price bond-name-title", { deprecated: bond.deprecated })}>
                         <>
-                            {priceUnits(bond)} {isBondLoading ? <Skeleton width="50px" /> : trim(bond.deprecated ? 0 : bond.bondPrice, 2)}
+                            {priceUnits(bond)} {isBondLoading ? <Skeleton width="50px" /> : trimPrice(bond.deprecated ? 0 : bond.bondPrice)}
                         </>
                     </p>
                 </div>
@@ -73,7 +85,7 @@ export function BondDataCard({ bond }: IBondProps) {
 }
 
 export function BondTableData({ bond }: IBondProps) {
-    const isBondLoading = bond.deprecated ? false : !bond.bondPrice ?? true;
+    const isBondLoading = bond.deprecated ? false : bond.bondPrice === undefined || bond.bondPrice === null;
 
     return (
         <TableRow>
@@ -91,7 +103,7 @@ export function BondTableData({ bond }: IBondProps) {
             <TableCell align="center">
                 <p className={classNames("bond-name-title", { deprecated: bond.deprecated })}>
                     <>
-                        <span className="currency-icon">{priceUnits(bond)}</span> {isBondLoading ? <Skeleton width="50px" /> : trim(bond.deprecated ? 0 : bond.bondPrice, 2)}
+                        <span className="currency-icon">{priceUnits(bond)}</span> {isBondLoading ? <Skeleton width="50px" /> : trimPrice(bond.deprecated ? 0 : bond.bondPrice)}
                     </>
                 </p>
             </TableCell>

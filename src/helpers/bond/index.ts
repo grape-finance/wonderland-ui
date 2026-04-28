@@ -8,9 +8,9 @@ import MimTimeIcon from "../../assets/tokens/TIME-MIM.svg";
 import AvaxTimeIcon from "../../assets/tokens/TIME-AVAX.svg";
 import EthIcon from "../../assets/tokens/WETH.e.png";
 import wMemoMimIcon from "../../assets/tokens/WMEMO-MIM.png";
-// Testnet bonds reuse the closest visual match from existing assets
-import UsdcIcon from "../../assets/tokens/MIM.svg";
-import WplsIcon from "../../assets/tokens/AVAX.svg";
+// Testnet bond icons
+import UsdcIcon from "../../assets/tokens/USDC.png";
+import WplsIcon from "../../assets/tokens/pulse.png";
 import TimeUsdcLpIcon from "../../assets/tokens/TIME-MIM.svg";
 import TimeWplsLpIcon from "../../assets/tokens/TIME-AVAX.svg";
 
@@ -210,10 +210,12 @@ export const usdcBond = new StableBond({
     bondIconSvg: UsdcIcon,
     bondContractABI: StableBondContract,
     reserveContractAbi: StableReserveContract,
+    reserveDecimals: 6,
+    disableZap: true,
     networkAddrs: {
         [Networks.PULSE_TESTNET]: {
-            bondAddress: "0x9D9747Ec64523E65132fEe1D1c93D15e8de133C3",
-            reserveAddress: "0xf43e6c627716c648bEc5873384dA94d3E33A4a25",
+            bondAddress: "0xC3da889bE5899F5f7c1f85147AA09a8bC6505fF1",
+            reserveAddress: "0x9131d71A23e0cdd8F0086ea525D1076B72a749eD",
         },
     },
     v2Bond: false,
@@ -230,9 +232,13 @@ export const wplsBond = new CustomBond({
     bondIconSvg: WplsIcon,
     bondContractABI: WavaxBondContract,
     reserveContractAbi: StableReserveContract,
+    disableZap: true,
+    // EthBondDepository: bondPriceInUSD = bondPrice() × assetPrice(oracle) × 1e6
+    // Display formula: bondPriceRaw / 1e16  (NOT formatUnits(raw, 18))
+    isEthBond: true,
     networkAddrs: {
         [Networks.PULSE_TESTNET]: {
-            bondAddress: "0x0603145F090BC9dA24D03EacCf1C4E63Ef75B9B1",
+            bondAddress: "0x422198AD5C252a4fe38d430f4cBD29687Ea51A3c",
             reserveAddress: "0x70499adEBB11Efd915E3b69E700c331778628707",
         },
     },
@@ -250,17 +256,18 @@ export const timeUsdcLpBond = new LPBond({
     bondIconSvg: TimeUsdcLpIcon,
     bondContractABI: LpBondContract,
     reserveContractAbi: LpReserveContract,
+    disableZap: true,
     networkAddrs: {
         [Networks.PULSE_TESTNET]: {
-            bondAddress: "0x2367247b680F5C998a4C5785d17c4CDC2cD35D77",
-            reserveAddress: "0x9d070B1dA73120C28006a3e3f4DB2b3598646fF1",
+            bondAddress: "0x2766EA82510CC3c306D5c8545182642e08CAe7f2",
+            reserveAddress: "0x67E352F4941Ce14643Ab8382eF41aB5173f1258f",
         },
     },
-    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xAf5123ED5E87935821e77449Ff0bb00E673033c3",
+    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1",
     v2Bond: false,
-    deprecated: false,
+    deprecated: true,
     isAvailable: {
-        [Networks.PULSE_TESTNET]: true,
+        [Networks.PULSE_TESTNET]: false,
     },
 });
 
@@ -271,17 +278,21 @@ export const timeWplsLpBond = new CustomLPBond({
     bondIconSvg: TimeWplsLpIcon,
     bondContractABI: LpBondContract,
     reserveContractAbi: LpReserveContract,
+    disableZap: true,
     networkAddrs: {
         [Networks.PULSE_TESTNET]: {
-            bondAddress: "0x11389d965b03d1Ed5593404205695a44A407da91",
-            reserveAddress: "0x67c4659D6fE88d14508Ad8900D6305C51eF6AcF7",
+            bondAddress: "0x997c367125Ca92CcdB15AA62DACfB599e24c38A8",
+            reserveAddress: "0x1702baa9aaD25664D96756a568FE8550c34C6B7b",
         },
     },
-    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xAf5123ED5E87935821e77449Ff0bb00E673033c3",
+    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1",
     v2Bond: false,
-    deprecated: false,
+    // StandardBondingCalculator.markdown() was designed for stablecoins (MIM/USDC).
+    // For WPLS (18 dec, $0.000009/token) the formula returns astronomical values.
+    // Disabling until a custom oracle-aware BondingCalculator is deployed.
+    deprecated: true,
     isAvailable: {
-        [Networks.PULSE_TESTNET]: true,
+        [Networks.PULSE_TESTNET]: false,
     },
 });
 

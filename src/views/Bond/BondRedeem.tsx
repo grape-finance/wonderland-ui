@@ -10,8 +10,6 @@ import { IAllBondData } from "../../hooks/bonds";
 import { IUserBondDetails } from "../../store/slices/account-slice";
 import { messages } from "../../constants/messages";
 import { warning } from "../../store/slices/messages-slice";
-import { Networks } from "../../constants";
-
 interface IBondRedeem {
     bond: IAllBondData;
 }
@@ -60,7 +58,7 @@ function BondRedeem({ bond }: IBondRedeem) {
         return prettifySeconds(bondingState.vestingTerm, "day");
     };
 
-    const displeyToken = chainID === Networks.PULSE ? "TIME" : "wMEMO";
+    const displeyToken = "TIME";
 
     return (
         <Box display="flex" flexDirection="column">
@@ -74,17 +72,15 @@ function BondRedeem({ bond }: IBondRedeem) {
                 >
                     <p>{txnButtonText(pendingTransactions, "redeem_bond_" + bond.name, "Claim")}</p>
                 </div>
-                {chainID === Networks.PULSE && (
-                    <div
-                        className="transaction-button bond-approve-btn"
-                        onClick={() => {
-                            if (isPendingTxn(pendingTransactions, "redeem_bond_" + bond.name + "_autostake")) return;
-                            onRedeem(true);
-                        }}
-                    >
-                        <p>{txnButtonText(pendingTransactions, "redeem_bond_" + bond.name + "_autostake", "Claim and Autostake")}</p>
-                    </div>
-                )}
+                <div
+                    className="transaction-button bond-approve-btn"
+                    onClick={() => {
+                        if (isPendingTxn(pendingTransactions, "redeem_bond_" + bond.name + "_autostake")) return;
+                        onRedeem(true);
+                    }}
+                >
+                    <p>{txnButtonText(pendingTransactions, "redeem_bond_" + bond.name + "_autostake", "Claim and Autostake")}</p>
+                </div>
             </Box>
 
             <Slide direction="right" in={true} mountOnEnter unmountOnExit {...{ timeout: 533 }}>
@@ -96,12 +92,10 @@ function BondRedeem({ bond }: IBondRedeem) {
                         </p>
                     </div>
 
-                    {chainID === Networks.PULSE && (
-                        <div className="data-row">
-                            <p className="bond-balance-title grey">Pending Rewards</p>
-                            <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.interestDueWrapped, 8)} wMEMO`}</p>
-                        </div>
-                    )}
+                    <div className="data-row">
+                        <p className="bond-balance-title grey">Pending Rewards</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.interestDueWrapped, 8)} wMEMO`}</p>
+                    </div>
 
                     <div className="data-row">
                         <p className="bond-balance-title">Claimable Rewards</p>
@@ -110,12 +104,10 @@ function BondRedeem({ bond }: IBondRedeem) {
                         </p>
                     </div>
 
-                    {chainID === Networks.PULSE && (
-                        <div className="data-row">
-                            <p className="bond-balance-title grey">Claimable Rewards</p>
-                            <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.pendingPayoutWrapped, 8)} wMEMO`}</p>
-                        </div>
-                    )}
+                    <div className="data-row">
+                        <p className="bond-balance-title grey">Claimable Rewards</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.pendingPayoutWrapped, 8)} wMEMO`}</p>
+                    </div>
 
                     <div className="data-row">
                         <p className="bond-balance-title">Time until fully vested</p>

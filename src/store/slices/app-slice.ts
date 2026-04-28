@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { getAddresses, WONDERLAND_API } from "../../constants";
-import { StakingContract, MemoExchangeAbi, MemoTokenContract, TreasuryContract } from "../../abi";
+import { StakingContract, MemoExchangeAbi, MemoTokenContract, TreasuryContract, StakingDistributorContract, TimeTokenContract } from "../../abi";
 import { setAll } from "../../helpers";
 import { createSlice, createSelector, createAsyncThunk } from "@reduxjs/toolkit";
 import { JsonRpcProvider } from "@ethersproject/providers";
@@ -39,23 +39,31 @@ export const loadAppDetails = createAsyncThunk("app/loadAppDetails", async ({ ne
         const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
         const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, MemoTokenContract, provider);
         const treasuryContract = new ethers.Contract(addresses.TREASURY_ADDRESS, TreasuryContract, provider);
+        const distributorContract = new ethers.Contract(addresses.DISTRIBUTOR_ADDRESS, StakingDistributorContract, provider);
+        const timeContract = new ethers.Contract(addresses.TIME_ADDRESS, TimeTokenContract, provider);
 
-        const [epoch, circ, currentIndex, totalReserves, totalSupply] = await Promise.all([
+        const [epoch, circ, currentIndex, totalReserves, totalSupply, nextReward, timeSupply] = await Promise.all([
             stakingContract.epoch(),
             memoContract.circulatingSupply(),
             stakingContract.index(),
             treasuryContract.totalReserves(),
             memoContract.totalSupply(),
+            distributorContract.nextRewardFor(addresses.STAKING_ADDRESS),
+            timeContract.totalSupply(),
         ]);
 
-        const stakingReward = epoch.distribute;
-        // Both distribute and circ are 9-decimal (gwei) values
-        const stakingRebase = circ.gt(0) ? stakingReward.mul(1e9).div(circ).toNumber() / 1e9 : 0;
+        // Rebase rate = nextReward / TIME.totalSupply() — the protocol-level rate
+        // (Distributor mints nextReward based on TIME.totalSupply × rate/1e6).
+        // Dividing by TIME.totalSupply gives the designed 0.5%/rebase regardless of
+        // how much is currently staked. Dividing by circ (staked MEMO) gives the
+        // per-staker rate, which is astronomical when few tokens are staked, leading
+        // to an unusable display.
+        const stakingRebase = timeSupply.gt(0) ? Number(nextReward) / Number(timeSupply) : 0;
         const fiveDayRate = Math.pow(1 + stakingRebase, 5 * 3) - 1;
         const stakingAPY = Math.pow(1 + stakingRebase, 365 * 3) - 1;
 
-        // TIME launched at $10; wMEMO price grows proportionally to index
-        const timePrice = 10;
+        // TIME launch price on testnet = $1; wMEMO = index × TIME price
+        const timePrice = 1;
         const indexFormatted = Number(ethers.utils.formatUnits(currentIndex, "gwei"));
         const wMemoMarketPrice = indexFormatted * timePrice;
 

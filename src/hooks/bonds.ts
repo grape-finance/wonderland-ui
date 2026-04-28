@@ -24,7 +24,8 @@ function useBonds() {
         let bondDetails: IAllBondData[];
         bondDetails = allBonds
             .flatMap(bond => {
-                if (bondState[bond.name] && bondState[bond.name].bondDiscount) {
+                // Check bondPrice (not bondDiscount) — 0% ROI is valid but bondDiscount=0 is falsy
+                if (bondState[bond.name] && (bondState[bond.name] as any).bondPrice !== undefined) {
                     return Object.assign(bond, bondState[bond.name]); // Keeps the object type
                 }
                 return bond;

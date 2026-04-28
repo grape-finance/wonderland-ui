@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Social from "./social";
 import StakeIcon from "../../../assets/icons/stake.svg";
+import BondIcon from "../../../assets/icons/bond.svg";
 import WonderlandIcon from "../../../assets/icons/wonderland-nav-header.svg";
 import DashboardIcon from "../../../assets/icons/dashboard.svg";
 import { trim, shorten } from "../../../helpers";
@@ -77,6 +78,23 @@ function NavContent() {
                             <div className="dapp-menu-item">
                                 <img alt="" src={StakeIcon} />
                                 <p>Stake</p>
+                            </div>
+                        </Link>
+                    )}
+
+                    {VIEWS_FOR_NETWORK[chainID]?.mints && (
+                        <Link
+                            component={NavLink}
+                            to="/mints"
+                            isActive={(match: any, location: any) => {
+                                const path = location.pathname.replace("/", "");
+                                return path.indexOf("mints") >= 0;
+                            }}
+                            className={classnames("button-dapp-menu", { active: isActive })}
+                        >
+                            <div className="dapp-menu-item">
+                                <img alt="" src={BondIcon} />
+                                <p>Mint</p>
                             </div>
                         </Link>
                     )}

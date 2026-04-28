@@ -51,7 +51,7 @@ function Calculator() {
 
     const calcNewBalance = () => {
         const apy = parseFloat(rewardYield) / 100;
-        // Convert APY to per-epoch rate: r = (1 + APY)^(1/epochs_per_year) - 1
+        // Per-epoch rate from APY: (1+APY)^(1/epochs_per_year) − 1, epochs_per_year = 365×3
         const perEpochRate = Math.pow(1 + apy, 1 / (365 * 3)) - 1 || 0;
         let balance = Number(wmemoAmount);
         balance = balance * wrapPrice;

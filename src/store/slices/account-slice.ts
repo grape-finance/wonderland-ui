@@ -291,21 +291,23 @@ export const calculateUserBondDetails = createAsyncThunk("account/calculateUserB
     bondMaturationBlock = Number(bondDetails.vesting) + lastTime;
     pendingPayout = await bondContract.pendingPayoutFor(address);
 
-    if (networkID === Networks.PULSE) {
-        pendingPayoutWrapped = (await wMemoContract.MEMOTowMEMO(pendingPayout)) / Math.pow(10, 18);
-    }
-
     let allowance,
         balance = "0";
 
     allowance = await reserveContract.allowance(address, bond.getAddressForBond(networkID));
     balance = await reserveContract.balanceOf(address);
-    const balanceVal = ethers.utils.formatEther(balance);
+    // Use the bond's actual reserve token decimals (e.g. 6 for USDC, 18 for others)
+    const balanceVal = ethers.utils.formatUnits(balance, bond.reserveDecimals);
 
     const avaxBalance = await provider.getSigner().getBalance();
     const avaxVal = ethers.utils.formatEther(avaxBalance);
 
     const pendingPayoutVal = bond.v2Bond ? ethers.utils.formatEther(pendingPayout) : ethers.utils.formatUnits(pendingPayout, "gwei");
+
+    // Compute wMEMO equivalent for both mainnet and testnet
+    if (!bond.v2Bond && addresses.WMEMO_ADDRESS) {
+        pendingPayoutWrapped = (await wMemoContract.MEMOTowMEMO(pendingPayout)) / Math.pow(10, 18);
+    }
 
     return {
         bond: bond.name,
