@@ -7,10 +7,8 @@ import type { Theme } from "@mui/material/styles";
 import { DRAWER_WIDTH, TRANSITION_DURATION } from "../../constants/style";
 import MobileDrawer from "../Drawer/mobile-drawer";
 import Drawer from "../Drawer";
-import { cubesImage } from "src/constants/img";
 import Messages from "../Messages";
 import LiquidityBanner from "../LiquidityBanner";
-import InfoBanner from "../InfoBanner";
 import AirdropBanner from "../AirdropBanner";
 import { useWeb3Context } from "../../hooks";
 import { Networks } from "../../constants/blockchain";
@@ -51,7 +49,6 @@ function ViewBase({ children }: IViewBaseProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const isSmallerScreen = useMediaQuery("(max-width: 960px)");
-    const isSmallScreen = useMediaQuery("(max-width: 600px)");
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -72,19 +69,10 @@ function ViewBase({ children }: IViewBaseProps) {
                 </Box>
             </div>
             <div className={`${classes.content} ${isSmallerScreen && classes.contentShift}`}>
-                {!isSmallerScreen && (
-                    <div className="cubes-top">
-                        <p>{cubesImage}</p>
-                    </div>
-                )}
-                {!isSmallScreen && (
-                    <div className="cubes-bottom">
-                        <p>{cubesImage}</p>
-                    </div>
-                )}
+                <div className="space-orbit space-orbit-one" aria-hidden="true" />
+                <div className="space-orbit space-orbit-two" aria-hidden="true" />
                 {/* {chainID === Networks.PULSE && <LiquidityBanner />} */}
                 {chainID === Networks.PULSE && <AirdropBanner />}
-                {chainID === Networks.PULSE && <InfoBanner />}
                 {children}
             </div>
         </div>

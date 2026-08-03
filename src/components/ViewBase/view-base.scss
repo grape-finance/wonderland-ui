@@ -1,41 +1,122 @@
 .view-base-root {
+    position: relative;
+    isolation: isolate;
     height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
-    background: #121415;
+    background:
+        radial-gradient(circle at 78% 20%, rgba(19, 183, 255, 0.14), transparent 28%),
+        radial-gradient(circle at 35% 105%, rgba(24, 70, 255, 0.18), transparent 34%),
+        linear-gradient(145deg, #02040d 0%, #061126 52%, #030815 100%);
 
-    .cubes-top {
-        opacity: 0.6;
-        position: absolute;
-        top: -120px;
+    > * {
+        position: relative;
+        z-index: 1;
+    }
 
-        p {
-            font-family: Courier;
-            font-style: normal;
-            font-weight: normal;
-            font-size: 6px;
-            color: #FFFFFF;
-            white-space: pre-wrap;
-            user-select: none;
+    &::before,
+    &::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    &::before {
+        z-index: 0;
+        opacity: 0.55;
+        background-image:
+            radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.5px),
+            radial-gradient(circle, rgba(73, 193, 255, 0.75) 0 1px, transparent 1.6px);
+        background-position: 0 0, 37px 59px;
+        background-size: 97px 97px, 151px 151px;
+        mask-image: linear-gradient(to bottom, black, transparent 92%);
+        will-change: background-position, opacity;
+        animation: pulsar-stars 18s linear infinite;
+    }
+
+    &::after {
+        z-index: 0;
+        inset: -12%;
+        background:
+            radial-gradient(circle at 72% 24%, rgba(88, 230, 255, 0.08), transparent 24%),
+            radial-gradient(circle at 28% 74%, rgba(255, 45, 172, 0.055), transparent 22%),
+            radial-gradient(circle at 52% 48%, rgba(122, 92, 255, 0.07), transparent 28%);
+        will-change: transform, opacity;
+        animation: pulsar-nebula 14s ease-in-out infinite alternate;
+    }
+
+    .space-orbit {
+        position: fixed;
+        z-index: 0;
+        border: 1px solid rgba(44, 177, 255, 0.16);
+        border-radius: 50%;
+        pointer-events: none;
+        filter: drop-shadow(0 0 18px rgba(0, 149, 255, 0.12));
+        transform: rotate(-18deg);
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff2dac;
+            box-shadow: 0 0 8px #ff2dac, 0 0 20px rgba(122, 92, 255, 0.7);
+            offset-path: ellipse(50% 50% at 50% 50%);
+            offset-distance: 0%;
+            offset-rotate: 0deg;
+            will-change: offset-distance, opacity;
+            animation: pulsar-dot-orbit 12s linear infinite, pulsar-beacon 2.8s ease-in-out infinite;
         }
     }
 
+    .space-orbit-one {
+        width: 720px;
+        height: 260px;
+        top: 7%;
+        right: -230px;
+    }
 
-    .cubes-bottom {
-        opacity: 0.6;
-        position: absolute;
-        bottom: -256px;
-        right: -140px;
+    .space-orbit-two {
+        width: 520px;
+        height: 180px;
+        bottom: 0;
+        left: 12%;
+        transform: rotate(21deg);
+        border-color: rgba(255, 45, 172, 0.1);
 
-        p {
-            font-family: Courier;
-            font-style: normal;
-            font-weight: normal;
-            font-size: 12px;
-            color: #FFFFFF;
-            white-space: pre-wrap;
-            user-select: none;
+        &::after {
+            animation: pulsar-dot-orbit 16s linear infinite reverse, pulsar-beacon 3.2s ease-in-out infinite;
         }
     }
+}
+
+@keyframes pulsar-stars {
+    0% {
+        opacity: 0.38;
+        background-position: 0 0, 37px 59px;
+    }
+    50% { opacity: 0.62; }
+    100% {
+        opacity: 0.38;
+        background-position: 97px 97px, 188px 210px;
+    }
+}
+
+@keyframes pulsar-nebula {
+    from { transform: translate3d(-3%, -2%, 0) rotate(-0.6deg) scale(1); opacity: 0.62; }
+    to { transform: translate3d(4%, 3%, 0) rotate(0.8deg) scale(1.08); opacity: 1; }
+}
+
+@keyframes pulsar-dot-orbit {
+    from { offset-distance: 0%; }
+    to { offset-distance: 100%; }
+}
+
+@keyframes pulsar-beacon {
+    50% { opacity: 0.35; box-shadow: 0 0 4px #ff2dac, 0 0 10px rgba(122, 92, 255, 0.35); }
 }

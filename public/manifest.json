@@ -1,8 +1,8 @@
 {
-  "short_name": "Wonderland",
+  "short_name": "Pulsar",
   "start_url": ".",
   "homepage": "./",
-  "name": "Wonderland",
+  "name": "Pulsar Protocol",
   "launch_path": "/public/index.html",
   "icons": [
     {
@@ -12,6 +12,6 @@
     }
   ],
   "display": "browser",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#030815",
+  "background_color": "#030815"
 }

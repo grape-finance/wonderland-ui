@@ -73,7 +73,7 @@ export default function ({ isWrap, setValue, setIsWrap, setIsWrapPrice, value }:
     const trimmedMemoBalance = trim(Number(memoBalance), 6);
     const trimmedWmemoBalance = trim(Number(wmemoBalance), 6);
 
-    const getBalance = () => (isWrap ? `${trimmedMemoBalance} MEMO` : `${trimmedWmemoBalance} wMEMO`);
+    const getBalance = () => (isWrap ? `${trimmedMemoBalance} QUASAR` : `${trimmedWmemoBalance} QUASAR`);
 
     const handleOnWrap = async () => {
         if (await checkWrongNetwork()) return;
@@ -110,7 +110,7 @@ export default function ({ isWrap, setValue, setIsWrap, setIsWrapPrice, value }:
                     startAdornment={
                         <InputAdornment position="start">
                             <div className="wrap-action-input-text">
-                                <p>{isWrap ? "MEMO" : "wMEMO"}</p>
+                                <p>{isWrap ? "QUASAR" : "QUASAR"}</p>
                             </div>
                         </InputAdornment>
                     }
@@ -137,7 +137,7 @@ export default function ({ isWrap, setValue, setIsWrap, setIsWrapPrice, value }:
                     startAdornment={
                         <InputAdornment position="start">
                             <div className="wrap-action-input-text">
-                                <p>{isWrap ? "wMEMO" : "MEMO"}</p>
+                                <p>{isWrap ? "QUASAR" : "QUASAR"}</p>
                             </div>
                         </InputAdornment>
                     }
@@ -194,7 +194,7 @@ export const MemoToWmemoPrice = ({ isWrapPrice, setIsWrapPrice }: MemoToWmemoPri
     return (
         <div className="wrap-price" onClick={() => setIsWrapPrice(!isWrapPrice)}>
             <p>
-                1 {isWrapPrice ? "MEMO" : "wMEMO"} = {`${trim(wrapPrice(), 4)} ${isWrapPrice ? "wMEMO" : "MEMO"}`}
+                1 {isWrapPrice ? "QUASAR" : "QUASAR"} = {`${trim(wrapPrice(), 4)} ${isWrapPrice ? "QUASAR" : "QUASAR"}`}
             </p>
         </div>
     );

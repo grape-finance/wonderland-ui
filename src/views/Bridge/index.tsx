@@ -7,7 +7,7 @@ import { IReduxState } from "../../store/slices/state.interface";
 import { Skeleton } from "@mui/material";
 import { trim } from "../../helpers";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
-import wMemoIcon from "../../assets/tokens/MEMO.png";
+import wMemoIcon from "../../assets/tokens/QUASAR.png";
 import { Networks } from "../../constants/blockchain";
 import { getChainList } from "../../helpers/get-chains";
 import SelectNetwork from "./components/SelectNetwork";
@@ -91,7 +91,7 @@ function Bridge() {
                                     <div className="bridge-card-wallet-connect-btn" onClick={connect}>
                                         <p>Connect Wallet</p>
                                     </div>
-                                    <p className="bridge-card-wallet-desc-text">Connect your wallet to bridge wMEMO tokens!</p>
+                                    <p className="bridge-card-wallet-desc-text">Connect your wallet to bridge QUASAR tokens!</p>
                                 </div>
                             )}
                             {address && (
@@ -116,7 +116,7 @@ function Bridge() {
                                                     <InputAdornment position="start">
                                                         <div className="bridge-card-action-input-token-wrap">
                                                             <img className="bridge-card-action-input-token-wrap-logo" src={wMemoIcon} alt="" />
-                                                            <p>wMEMO</p>
+                                                            <p>QUASAR</p>
                                                         </div>
                                                     </InputAdornment>
                                                 }
@@ -165,11 +165,11 @@ function Bridge() {
                                     <div className="bridge-user-data">
                                         <div className="data-row">
                                             <p className="data-row-name">Your Balance</p>
-                                            <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{trim(Number(wMemoBalance), 6)} wMEMO</>}</p>
+                                            <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{trim(Number(wMemoBalance), 6)} QUASAR</>}</p>
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Expected</p>
-                                            <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{calcExpected()} wMEMO</>}</p>
+                                            <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{calcExpected()} QUASAR</>}</p>
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Crosschain Fee</p>
@@ -177,26 +177,26 @@ function Bridge() {
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Minimum Crosschain Fee</p>
-                                            <p className="data-row-value">0.00056 wMEMO</p>
+                                            <p className="data-row-value">0.00056 QUASAR</p>
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Maximum Crosschain Fee</p>
-                                            <p className="data-row-value">0.015 wMEMO</p>
+                                            <p className="data-row-value">0.015 QUASAR</p>
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Minimum Crosschain Amount</p>
-                                            <p className="data-row-value">0.00063 wMEMO</p>
+                                            <p className="data-row-value">0.00063 QUASAR</p>
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Maximum Crosschain Amount</p>
-                                            <p className="data-row-value">75 wMEMO</p>
+                                            <p className="data-row-value">75 QUASAR</p>
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Estimated Time of Crosschain Arrival</p>
                                             <p className="data-row-value">10-30 min</p>
                                         </div>
                                         <div className="data-row">
-                                            <p className="data-row-name">Crosschain amount larger than 15 wMEMO could take up to</p>
+                                            <p className="data-row-name">Crosschain amount larger than 15 QUASAR could take up to</p>
                                             <p className="data-row-value">12 hours</p>
                                         </div>
                                         <div className="data-row">

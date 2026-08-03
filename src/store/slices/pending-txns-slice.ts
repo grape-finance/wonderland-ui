@@ -25,15 +25,15 @@ const pendingTxnsSlice = createSlice({
 });
 
 export const getStakingTypeText = (action: string) => {
-    return action.toLowerCase() === "stake" ? "Staking TIME" : "Unstaking MEMO";
+    return action.toLowerCase() === "stake" ? "Staking PULSAR" : "Unstaking QUASAR";
 };
 
 export const getFarmStakingTypeText = (action: string) => {
-    return action.toLowerCase() === "stake" ? "Staking wMEMO" : "Unstaking wMEMO";
+    return action.toLowerCase() === "stake" ? "Staking QUASAR" : "Unstaking QUASAR";
 };
 
 export const getWrappingTypeText = (isWrap: boolean) => {
-    return isWrap ? "Wrap MEMO" : "Unwrap wMEMO";
+    return isWrap ? "Wrap QUASAR" : "Unwrap QUASAR";
 };
 
 export const isPendingTxn = (pendingTransactions: IPendingTxn[], type: string) => {

@@ -113,21 +113,21 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
 
     const bondContract = bond.getContractForBond(networkID, provider);
     const bondCalcContract = getBondCalculator(networkID, provider);
-    const wMemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    const wMemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
 
     const terms = await bondContract.terms();
     const maxBondPriceRaw = await bondContract.maxPayout();
-    // TIME uses 9 decimals — use formatUnits to safely convert BigNumber
+    // PULSAR uses 9 decimals — use formatUnits to safely convert BigNumber
     let maxBondPrice = Number(ethers.utils.formatUnits(maxBondPriceRaw, "gwei"));
     const maxBondPriceWrapped = (await wMemoContract.MEMOTowMEMO(maxBondPriceRaw)) / Math.pow(10, 18);
 
     // --- Market price resolution ---
-    // On testnet: no Coingecko data exists for TIME, so read from app Redux state
+    // On testnet: no Coingecko data exists for PULSAR, so read from app Redux state
     // (populated by loadAppDetails which queries the staking contract index).
     // Fall back to on-chain staking index if app state hasn't loaded yet.
     // On mainnet: use the existing API helper.
-    let marketPrice: number; // TIME price in USD
-    let wMemoPrice: number;  // wMEMO price in USD
+    let marketPrice: number; // PULSAR price in USD
+    let wMemoPrice: number;  // QUASAR price in USD
 
     if (networkID === Networks.PULSE_TESTNET) {
         const appState = (getState() as RootState).app as any;
@@ -139,7 +139,7 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
             const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
             const currentIndex = await stakingContract.index();
             const indexNum = Number(ethers.utils.formatUnits(currentIndex, "gwei"));
-            // TIME launch price on testnet is $1; wMEMO = index * TIME price
+            // PULSAR launch price on testnet is $1; QUASAR = index * PULSAR price
             marketPrice = marketPrice || 1;
             wMemoPrice = wMemoPrice || (indexNum * (marketPrice || 1));
         }
@@ -158,15 +158,15 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
     //
     // EthBondDepository (non-LP, e.g. WPLS):
     //   bondPriceInUSD() = bondPrice() × assetPrice(oracle, 8 dec) × 1e6
-    //   USD per TIME = (bondPrice/100) × (assetPrice/1e8) = raw / 1e16
+    //   USD per PULSAR = (bondPrice/100) × (assetPrice/1e8) = raw / 1e16
     //   Display: raw / 1e16
     //
-    // BondDepository (LP, e.g. TIME-USDC LP):
+    // BondDepository (LP, e.g. PULSAR-USDC LP):
     //   bondPriceInUSD() = bondPrice() × markdown(LP) / 100
-    //   markdown = nonTIME_reserve × 2 × 1e9 / getTotalValue
+    //   markdown = non-PULSAR reserve × 2 × 1e9 / getTotalValue
     //   For stablecoin LP (USDC 6 dec, $1 price): result / 1e7 = USD price ✓
     //   For WPLS LP: markdown is astronomically large (formula assumes stablecoin).
-    //                TIME-WPLS LP is disabled (deprecated: true) until a custom
+    //                PULSAR-WPLS LP is disabled (deprecated: true) until a custom
     //                oracle-aware BondingCalculator is available.
     try {
         const bondPriceRaw = await bondContract.bondPriceInUSD();
@@ -211,8 +211,8 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
     } else {
         if (!bond.deprecated) {
             // For non-LP bonds, payoutFor() expects treasury-normalized units.
-            // treasury.valueOf(anyToken, 1 whole token) always returns 1e9 TIME-gwei,
-            // because the treasury normalises by (tokenDecimals → TIME decimals = 9).
+            // treasury.valueOf(anyToken, 1 whole token) always returns 1e9 PULSAR-gwei,
+            // because the treasury normalises by (tokenDecimals → PULSAR decimals = 9).
             // So for N user tokens the correct input is N * 1e9 = parseUnits(value, 9).
             const amountForPayout = ethers.utils.parseUnits(value, 9); // value × 1e9
             try {
@@ -230,8 +230,8 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
             const oneTokenNorm = ethers.BigNumber.from(10).pow(9);
             try {
                 const maxBondQuote = await bondContract.payoutFor(oneTokenNorm);
-                // maxBondQuote is TIME-gwei payout for 1 whole token
-                // maxBondPriceToken = how many whole tokens to reach maxBondPrice TIME
+                // maxBondQuote is PULSAR-gwei payout for 1 whole token
+                // maxBondPriceToken = how many whole tokens to reach maxBondPrice PULSAR
                 maxBondPriceToken = maxBondPrice / Number(ethers.utils.formatUnits(maxBondQuote, 9));
             } catch (e) {
                 console.log("payoutFor maxBondQuote error (non-LP)", e);
@@ -287,8 +287,8 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
         purchased,
         vestingTerm: Number(terms.vestingTerm),
         maxBondPrice,
-        bondPrice,           // USD price per TIME (already formatted)
-        marketPrice: wMemoPrice, // wMEMO price shown in Bond header
+        bondPrice,           // USD price per PULSAR (already formatted)
+        marketPrice: wMemoPrice, // QUASAR price shown in Bond header
         maxBondPriceToken,
         bondQuoteWrapped,
         maxBondPriceWrapped,
@@ -321,7 +321,7 @@ export const calcBondV2Details = createAsyncThunk("bonding/calcBondV2Details", a
     const terms = await bondContract.terms();
     let maxBondPrice = (await bondContract.maxPayout()) / Math.pow(10, 18);
 
-    const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
     const treasutyBalance = (await wmemoContract.balanceOf(addresses.TREASURY_ADDRESS)) / Math.pow(10, 18);
 
     maxBondPrice = treasutyBalance > maxBondPrice ? maxBondPrice : treasutyBalance;

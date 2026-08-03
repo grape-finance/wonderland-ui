@@ -23,7 +23,7 @@ function LiquidityBanner() {
                     </a>
                 </p>
                 <p className="liquidity-banner-text upper">
-                    To buy and sell wMemo, please click{" "}
+                    To buy and sell QUASAR, please click{" "}
                     <a
                         target="_blank"
                         href="https://avalanche.sushi.com/swap?inputCurrency=0x0da67235dD5787D67955420C84ca1cEcd4E5Bb3b&outputCurrency=0x130966628846BFd36ff31a822705796e8cb8C18D"

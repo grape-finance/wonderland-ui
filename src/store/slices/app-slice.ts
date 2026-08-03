@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { getAddresses, WONDERLAND_API } from "../../constants";
+import { getAddresses, PULSAR_ANALYTICS_API } from "../../constants";
 import { StakingContract, MemoExchangeAbi, MemoTokenContract, TreasuryContract, StakingDistributorContract, TimeTokenContract } from "../../abi";
 import { setAll } from "../../helpers";
 import { createSlice, createSelector, createAsyncThunk } from "@reduxjs/toolkit";
@@ -32,15 +32,15 @@ export const loadAppDetails = createAsyncThunk("app/loadAppDetails", async ({ ne
     const currentBlockTime = (await provider.getBlock(currentBlock)).timestamp;
 
     // Testnet: read all metrics directly from on-chain contracts to avoid
-    // dependence on the external Wonderland API (which tracks mainnet only).
+    // dependence on the external analytics API (which tracks mainnet only).
     if (networkID === Networks.PULSE_TESTNET) {
         const addresses = getAddresses(networkID);
 
         const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
-        const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, MemoTokenContract, provider);
+        const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
         const treasuryContract = new ethers.Contract(addresses.TREASURY_ADDRESS, TreasuryContract, provider);
         const distributorContract = new ethers.Contract(addresses.DISTRIBUTOR_ADDRESS, StakingDistributorContract, provider);
-        const timeContract = new ethers.Contract(addresses.TIME_ADDRESS, TimeTokenContract, provider);
+        const timeContract = new ethers.Contract(addresses.PULSAR_ADDRESS, TimeTokenContract, provider);
 
         const [epoch, circ, currentIndex, totalReserves, totalSupply, nextReward, timeSupply] = await Promise.all([
             stakingContract.epoch(),
@@ -52,24 +52,24 @@ export const loadAppDetails = createAsyncThunk("app/loadAppDetails", async ({ ne
             timeContract.totalSupply(),
         ]);
 
-        // Rebase rate = nextReward / TIME.totalSupply() — the protocol-level rate
-        // (Distributor mints nextReward based on TIME.totalSupply × rate/1e6).
-        // Dividing by TIME.totalSupply gives the designed 0.5%/rebase regardless of
-        // how much is currently staked. Dividing by circ (staked MEMO) gives the
+        // Rebase rate = nextReward / PULSAR.totalSupply() — the protocol-level rate
+        // (Distributor mints nextReward based on PULSAR.totalSupply × rate/1e6).
+        // Dividing by PULSAR.totalSupply gives the designed 0.5%/rebase regardless of
+        // how much is currently staked. Dividing by circ (staked QUASAR) gives the
         // per-staker rate, which is astronomical when few tokens are staked, leading
         // to an unusable display.
         const stakingRebase = timeSupply.gt(0) ? Number(nextReward) / Number(timeSupply) : 0;
         const fiveDayRate = Math.pow(1 + stakingRebase, 5 * 3) - 1;
         const stakingAPY = Math.pow(1 + stakingRebase, 365 * 3) - 1;
 
-        // TIME launch price on testnet = $1; wMEMO = index × TIME price
+        // PULSAR launch price on testnet = $1; QUASAR = index × PULSAR price
         const timePrice = 1;
         const indexFormatted = Number(ethers.utils.formatUnits(currentIndex, "gwei"));
         const wMemoMarketPrice = indexFormatted * timePrice;
 
         const circFormatted = Number(ethers.utils.formatUnits(circ, "gwei"));
         const supplyFormatted = Number(ethers.utils.formatUnits(totalSupply, "gwei"));
-        // Treasury stores reserves as 9-decimal TIME-equivalent value
+        // Treasury stores reserves as 9-decimal PULSAR-equivalent value
         const treasuryBalance = Number(ethers.utils.formatUnits(totalReserves, 9));
 
         return {
@@ -89,10 +89,10 @@ export const loadAppDetails = createAsyncThunk("app/loadAppDetails", async ({ ne
         };
     }
 
-    // Mainnet: use external Wonderland API + on-chain reads as before.
+    // Mainnet: use the external analytics API plus on-chain reads.
     const { wMemoPrice } = await getMarketPrice();
     const { total, zapper } = await getFundTotal();
-    const { wmemo } = await (await axios.get(WONDERLAND_API)).data;
+    const { wmemo } = await (await axios.get(PULSAR_ANALYTICS_API)).data;
 
     const rfvWmemo = total / Number(ethers.utils.formatEther(wmemo.circulation));
     const marketCap = Number(ethers.utils.formatEther(wmemo.totalSupply)) * wMemoPrice;
@@ -104,7 +104,7 @@ export const loadAppDetails = createAsyncThunk("app/loadAppDetails", async ({ ne
 
     const addresses = getAddresses(networkID);
     const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
-    const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, MemoTokenContract, provider);
+    const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
 
     const epoch = await stakingContract.epoch();
     const stakingReward = epoch.distribute;

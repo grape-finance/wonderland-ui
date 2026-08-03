@@ -4,15 +4,15 @@ import { StableBond, CustomBond, StableV2Bond } from "./stable-bond";
 
 import MimIcon from "../../assets/tokens/MIM.svg";
 import AvaxIcon from "../../assets/tokens/AVAX.svg";
-import MimTimeIcon from "../../assets/tokens/TIME-MIM.svg";
-import AvaxTimeIcon from "../../assets/tokens/TIME-AVAX.svg";
+import MimTimeIcon from "../../assets/tokens/PULSAR-MIM.svg";
+import AvaxTimeIcon from "../../assets/tokens/PULSAR-AVAX.svg";
 import EthIcon from "../../assets/tokens/WETH.e.png";
-import wMemoMimIcon from "../../assets/tokens/WMEMO-MIM.png";
+import wMemoMimIcon from "../../assets/tokens/QUASAR-MIM.png";
 // Testnet bond icons
 import UsdcIcon from "../../assets/tokens/USDC.png";
 import WplsIcon from "../../assets/tokens/pulse.png";
-import TimeUsdcLpIcon from "../../assets/tokens/TIME-MIM.svg";
-import TimeWplsLpIcon from "../../assets/tokens/TIME-AVAX.svg";
+import TimeUsdcLpIcon from "../../assets/tokens/PULSAR-MIM.svg";
+import TimeWplsLpIcon from "../../assets/tokens/PULSAR-AVAX.svg";
 
 import { StableBondContract, LpBondContract, WavaxBondContract, StableReserveContract, LpReserveContract, WethBondContract, ProBondContract } from "../../abi";
 import { getWmemoMarketPrice } from "../get-wmemo-price";
@@ -124,7 +124,7 @@ export const weth = new CustomBond({
 
 export const mimTime = new LPBond({
     name: "mim_time_lp",
-    displayName: "TIME-MIM LP",
+    displayName: "PULSAR-MIM LP",
     bondToken: "MIM",
     bondIconSvg: MimTimeIcon,
     bondContractABI: LpBondContract,
@@ -150,7 +150,7 @@ export const mimTime = new LPBond({
 
 export const avaxTime = new CustomLPBond({
     name: "avax_time_lp",
-    displayName: "TIME-AVAX LP",
+    displayName: "PULSAR-AVAX LP",
     bondToken: "AVAX",
     bondIconSvg: AvaxTimeIcon,
     bondContractABI: LpBondContract,
@@ -176,7 +176,7 @@ export const avaxTime = new CustomLPBond({
 
 export const wmemoMim = new NotTimeLpBond({
     name: "wmemo_mim_lp",
-    displayName: "wMEMO-MIM SLP",
+    displayName: "QUASAR-MIM SLP",
     bondToken: "MIM",
     bondIconSvg: wMemoMimIcon,
     bondContractABI: LpBondContract,
@@ -251,7 +251,7 @@ export const wplsBond = new CustomBond({
 
 export const timeUsdcLpBond = new LPBond({
     name: "time_usdc_lp",
-    displayName: "TIME-USDC LP",
+    displayName: "PULSAR-USDC LP",
     bondToken: "USDC",
     bondIconSvg: TimeUsdcLpIcon,
     bondContractABI: LpBondContract,
@@ -273,7 +273,7 @@ export const timeUsdcLpBond = new LPBond({
 
 export const timeWplsLpBond = new CustomLPBond({
     name: "time_wpls_lp",
-    displayName: "TIME-WPLS LP",
+    displayName: "PULSAR-WPLS LP",
     bondToken: "WPLS",
     bondIconSvg: TimeWplsLpIcon,
     bondContractABI: LpBondContract,

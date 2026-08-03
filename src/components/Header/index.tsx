@@ -3,13 +3,9 @@ import { makeStyles } from "@mui/styles";
 import type { Theme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import MenuIcon from "../../assets/icons/hamburger.svg";
-import TimeMenu from "./time-menu";
 import ConnectButton from "./connect-button";
-import WrapButton from "./wrap-button";
 import "./header.scss";
 import { DRAWER_WIDTH, TRANSITION_DURATION } from "../../constants/style";
-import { useWeb3Context } from "../../hooks";
-import { Networks } from "../../constants/blockchain";
 import NetworkMenu from "./network-menu";
 
 interface IHeader {
@@ -48,8 +44,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 function Header({ handleDrawerToggle, drawe }: IHeader) {
     const classes = useStyles();
     const isVerySmallScreen = useMediaQuery("(max-width: 548px)");
-    const isWrapShow = useMediaQuery("(max-width: 710px)");
-    const { chainID } = useWeb3Context();
 
     return (
         <div className={`${classes.topBar} ${!drawe && classes.topBarShift}`}>
@@ -59,8 +53,6 @@ function Header({ handleDrawerToggle, drawe }: IHeader) {
                         <img src={MenuIcon} alt="" />
                     </div>
                     <div className="dapp-topbar-btns-wrap">
-                        {!isWrapShow && chainID === Networks.PULSE && <TimeMenu />}
-                        {chainID === Networks.PULSE && <WrapButton />}
                         {!isVerySmallScreen && <NetworkMenu />}
                         <ConnectButton />
                     </div>

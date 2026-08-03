@@ -1,7 +1,7 @@
 export const messages = {
-    please_connect: "Please connect your wallet to the Avalanche network to use Wonderland.",
+    please_connect: "Please connect your wallet to PulseChain to use Pulsar.",
     please_connect_wallet: "Please connect your wallet.",
-    try_mint_more: (value: string) => `You're trying to mint more than the maximum payout available! The maximum mint payout is ${value} TIME.`,
+    try_mint_more: (value: string) => `You're trying to mint more than the maximum payout available! The maximum mint payout is ${value} PULSAR.`,
     before_minting: "Before minting, enter a value.",
     existing_mint:
         "You have an existing mint. Minting will reset your vesting period and forfeit any pending claimable rewards. We recommend claiming rewards first or using a fresh wallet. Do you still wish to proceed?",
@@ -19,6 +19,6 @@ export const messages = {
     before_unwrap: "Before un wrapping, enter a value.",
     before_bridge: "Before bridge, enter a value.",
     rpc_connection_lost: "Rpc connection lost",
-    min_bridge_amount: "Minimum Crosschain Amount 0.00063 wMEMO",
+    min_bridge_amount: "Minimum Crosschain Amount 0.00063 QUASAR",
     before_redemption: "Before redemption, enter a value.",
 };

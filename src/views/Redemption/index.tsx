@@ -7,7 +7,7 @@ import { prettifySeconds, trim } from "src/helpers";
 import { usePathForNetwork, useWeb3Context } from "src/hooks";
 import { IReduxState } from "src/store/slices/state.interface";
 import "./redemption.scss";
-import wMemoIcon from "../../assets/tokens/MEMO.png";
+import wMemoIcon from "../../assets/tokens/QUASAR.png";
 import UsdcIcon from "../../assets/tokens/USDC.e.png";
 import BsggIcon from "../../assets/tokens/BSGG.png";
 import BridgeIcon from "../../assets/icons/bridge.svg";
@@ -131,7 +131,7 @@ function Redemption() {
                                     <div className="redemption-card-wallet-connect-btn" onClick={connect}>
                                         <p>Connect Wallet</p>
                                     </div>
-                                    <p className="redemption-card-wallet-desc-text">Connect your wallet for redeem wMEMO tokens!</p>
+                                    <p className="redemption-card-wallet-desc-text">Connect your wallet for redeem QUASAR tokens!</p>
                                 </div>
                             )}
                             {address && (
@@ -150,7 +150,7 @@ function Redemption() {
                                                     <InputAdornment position="start">
                                                         <div className="redemption-input-token-wrap">
                                                             <img className="redemption-input-token-wrap-logo" src={wMemoIcon} alt="" />
-                                                            <p>wMEMO</p>
+                                                            <p>QUASAR</p>
                                                         </div>
                                                     </InputAdornment>
                                                 }
@@ -227,18 +227,18 @@ function Redemption() {
                                         )}
 
                                         <div className="help-text">
-                                            <p>Note: This action is one way only, once you redeem your USDC + BSGG you can not go back to wMEMO</p>
+                                            <p>Note: This action is one way only, once you redeem your USDC + BSGG you can not go back to QUASAR</p>
                                         </div>
                                     </div>
                                     <div className="redemption-user-data">
                                         <div className="data-row">
                                             <p className="data-row-name">Your Wallet Balance</p>
-                                            <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{trimmedWmemoBalance} wMEMO</>}</p>
+                                            <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{trimmedWmemoBalance} QUASAR</>}</p>
                                         </div>
                                         <div className="data-row">
                                             <p className="data-row-name">Maximum Claimable Amount</p>
                                             <p className="data-row-value">
-                                                {isAppLoading ? <Skeleton width="80px" /> : inList ? <>{trimmedAvailableToClaim} wMEMO</> : "Address not eligible for redemption"}
+                                                {isAppLoading ? <Skeleton width="80px" /> : inList ? <>{trimmedAvailableToClaim} QUASAR</> : "Address not eligible for redemption"}
                                             </p>
                                         </div>
                                         <div className="data-row">
@@ -248,7 +248,7 @@ function Redemption() {
                                                     <Skeleton width="80px" />
                                                 ) : (
                                                     <div style={{ display: "flex" }}>
-                                                        <p style={{ margin: "auto" }}>1 wMEMO = </p>
+                                                        <p style={{ margin: "auto" }}>1 QUASAR = </p>
                                                         <div style={{ marginLeft: 5 }}>
                                                             <p>{ethers.utils.formatUnits(redemptionRateUsdc, "mwei")} USDC</p>
                                                             <p>{ethers.utils.formatEther(redemptionRateBsgg)} BSGG</p>

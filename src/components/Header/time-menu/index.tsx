@@ -31,9 +31,9 @@ function TimeMenu() {
 
     const addresses = getAddresses(DEFAULD_NETWORK);
 
-    const MEMO_ADDRESS = addresses.MEMO_ADDRESS;
-    const TIME_ADDRESS = addresses.TIME_ADDRESS;
-    const wMEMO_ADDRESS = addresses.WMEMO_ADDRESS;
+    const QUASAR_ADDRESS = addresses.QUASAR_ADDRESS;
+    const PULSAR_ADDRESS = addresses.PULSAR_ADDRESS;
+    const wQUASAR_ADDRESS = addresses.WRAPPED_QUASAR_ADDRESS;
 
     const handleClick = (event: any) => {
         setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -44,7 +44,7 @@ function TimeMenu() {
     return (
         <div className="time-menu-root" onMouseEnter={e => handleClick(e)} onMouseLeave={e => handleClick(e)}>
             <div className="time-menu-btn">
-                <p>wMEMO</p>
+                <p>QUASAR</p>
             </div>
 
             <Popper className="time-menu-popper" open={open} anchorEl={anchorEl} transition>
@@ -66,14 +66,14 @@ function TimeMenu() {
                                     <div className="divider" />
                                     <p className="add-tokens-title">ADD TOKEN TO WALLET</p>
                                     <div className="divider" />
-                                    <div className="tooltip-item" onClick={addTokenToWallet("wMEMO", wMEMO_ADDRESS, 18)}>
-                                        <p>wMEMO</p>
+                                    <div className="tooltip-item" onClick={addTokenToWallet("QUASAR", wQUASAR_ADDRESS, 18)}>
+                                        <p>QUASAR</p>
                                     </div>
-                                    <div className="tooltip-item" onClick={addTokenToWallet("TIME", TIME_ADDRESS)}>
-                                        <p>TIME</p>
+                                    <div className="tooltip-item" onClick={addTokenToWallet("PULSAR", PULSAR_ADDRESS)}>
+                                        <p>PULSAR</p>
                                     </div>
-                                    <div className="tooltip-item" onClick={addTokenToWallet("MEMO", MEMO_ADDRESS)}>
-                                        <p>MEMO</p>
+                                    <div className="tooltip-item" onClick={addTokenToWallet("QUASAR", QUASAR_ADDRESS)}>
+                                        <p>QUASAR</p>
                                     </div>
                                 </div>
                             )}

@@ -25,7 +25,7 @@ export const changeApproval = createAsyncThunk("farm/changeApproval", async ({ p
 
     const addresses = getAddresses(networkID);
     const signer = provider.getSigner();
-    const wMemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, signer);
+    const wMemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, signer);
 
     let approveTx;
     try {

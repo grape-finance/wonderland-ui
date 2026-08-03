@@ -27,7 +27,7 @@ export const changeApproval = createAsyncThunk("redemption/changeApproval", asyn
 
     const addresses = getAddresses(networkID);
     const signer = provider.getSigner();
-    const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, signer);
+    const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, signer);
 
     let approveTx;
     try {

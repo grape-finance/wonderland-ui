@@ -15,7 +15,18 @@ import CssBaseline from "@mui/material/CssBaseline";
 const theme = createTheme({
     palette: {
         mode: "dark",
+        primary: { main: "#16b9ff", light: "#7bd9ff", dark: "#0878e8" },
+        background: { default: "#030815", paper: "#071126" },
+        text: { primary: "#f4f9ff", secondary: "#8ea7c8" },
     },
+    typography: {
+        fontFamily: 'Manrope, sans-serif',
+        button: {
+            fontFamily: 'Oxanium, sans-serif',
+            letterSpacing: "0.06em",
+        },
+    },
+    shape: { borderRadius: 12 },
 });
 
 const container = document.getElementById("root")!;
@@ -25,7 +36,10 @@ root.render(
     <ThemeProvider theme={theme}>
         <CssBaseline />
         <WagmiConfig client={wagmiClient}>
-            <RainbowKitProvider chains={chains} theme={darkTheme()}>
+            <RainbowKitProvider
+                chains={chains}
+                theme={darkTheme({ accentColor: "#16b9ff", accentColorForeground: "#020713", borderRadius: "medium" })}
+            >
                 <SnackbarProvider
                     maxSnack={4}
                     anchorOrigin={{

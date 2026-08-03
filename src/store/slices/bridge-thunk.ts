@@ -25,7 +25,7 @@ export const changeApproval = createAsyncThunk("bridge/changeApproval", async ({
 
     const addresses = getAddresses(networkID);
     const signer = provider.getSigner();
-    const wMemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, signer);
+    const wMemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, signer);
 
     let approveTx;
     try {
@@ -85,9 +85,9 @@ export const bridgeSwap = createAsyncThunk("bridge/bridgeSwap", async ({ provide
 
     try {
         if (networkID === Networks.PULSE) {
-            swapTx = await anyswapContract.anySwapOutUnderlying(addresses.ANY_WMEMO_ADDRESS, address, valueInWei, BigNumber.from(toChain));
+            swapTx = await anyswapContract.anySwapOutUnderlying(addresses.ANY_WRAPPED_QUASAR_ADDRESS, address, valueInWei, BigNumber.from(toChain));
         } else {
-            swapTx = await anyswapContract["anySwapOut(address,address,uint256,uint256)"](addresses.WMEMO_ADDRESS, address, valueInWei, BigNumber.from(toChain));
+            swapTx = await anyswapContract["anySwapOut(address,address,uint256,uint256)"](addresses.WRAPPED_QUASAR_ADDRESS, address, valueInWei, BigNumber.from(toChain));
         }
 
         dispatch(

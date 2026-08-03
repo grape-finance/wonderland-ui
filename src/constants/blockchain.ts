@@ -8,7 +8,7 @@ export enum Networks {
 export const DEFAULD_NETWORK = Networks.PULSE;
 
 export const AVAILABLE_CHAINS = [Networks.PULSE, Networks.PULSE_TESTNET];
-export const WMEMO_BRIDG_CHAINS = [Networks.PULSE, Networks.PULSE_TESTNET];
+export const QUASAR_BRIDGE_CHAINS = [Networks.PULSE, Networks.PULSE_TESTNET];
 
 export const NetworksInfo = {
     [Networks.PULSE]: {

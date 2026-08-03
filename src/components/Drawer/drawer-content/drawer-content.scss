@@ -3,6 +3,9 @@
   min-width: 280px;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid rgba(62, 187, 255, 0.14);
+  background: linear-gradient(180deg, rgba(5, 13, 31, 0.92), rgba(2, 6, 18, 0.82));
+  box-shadow: 22px 0 60px rgba(0, 0, 0, 0.3);
 
   .branding-header {
     display: flex;
@@ -10,13 +13,47 @@
     justify-content: center;
     align-items: center;
     text-decoration: none;
-    margin: 20px 0 63px 0;
+    margin: 24px 0 38px;
+
+    .pulsar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      > img {
+        width: 76px;
+        height: 76px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 14px rgba(18, 181, 255, 0.45));
+      }
+
+      .pulsar-wordmark {
+        display: flex;
+        flex-direction: column;
+        color: #fff;
+        letter-spacing: 0.22em;
+
+        span {
+          font-family: Oxanium;
+          font-size: 18px;
+          line-height: 1.1;
+        }
+
+        small {
+          margin-top: 5px;
+          color: #6bcaff;
+          font-family: Oxanium;
+          font-size: 8px;
+          letter-spacing: 0.38em;
+        }
+      }
+    }
 
     .wallet-link {
       margin: 10px;
   
       p{
-        font-family: Montserrat SemiBold;
+        font-family: Oxanium;
         font-size: 14px;
         color: #FFFFFF;
       }
@@ -32,10 +69,22 @@
       flex-flow: column;
 
       a {
-        margin-top: 20px;
+        margin-top: 4px;
         margin-left: 20px;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 8px;
+        width: 240px;
+        padding: 11px 14px;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: 180ms ease;
+
+        &:hover {
+          background: linear-gradient(90deg, rgba(122, 92, 255, 0.1), rgba(255, 45, 172, 0.035));
+          border-color: rgba(122, 92, 255, 0.26);
+          transform: translateX(3px);
+        }
 
         img {
           width: 20px;
@@ -55,16 +104,30 @@
             font-weight: 600;
             font-size: 16px;
             color: #FFFFFF;
-            font-family: Montserrat SemiBold;
+            font-family: Oxanium;
           }
         }
       }
 
       .button-dapp-menu.active {
+        background: linear-gradient(90deg, rgba(9, 154, 255, 0.18), rgba(122, 92, 255, 0.08), rgba(255, 45, 172, 0.025));
+        border-color: rgba(56, 190, 255, 0.34);
+        box-shadow: inset 3px 0 #12b7ff, 0 8px 24px rgba(0, 102, 255, 0.1);
+
         .dapp-menu-item{
           p{
-            text-decoration: underline;
+            color: #7fd6ff;
           }
+        }
+
+        &::after {
+          content: "";
+          width: 4px;
+          height: 4px;
+          margin-left: auto;
+          border-radius: 50%;
+          background: #ff2dac;
+          box-shadow: 0 0 9px rgba(255, 45, 172, 0.8);
         }
       }
 
@@ -79,7 +142,7 @@
         }
       
         p{
-          font-family: Montserrat;
+          font-family: Manrope;
           font-size: 14px;
           line-height: 17px;
           color: rgba(255, 255, 255, 0.6);
@@ -126,7 +189,7 @@
       }
 
       p{
-        font-family: Montserrat SemiBold;
+        font-family: Oxanium;
         font-weight: 600;
         font-size: 16px;
         line-height: 20px;
@@ -139,10 +202,11 @@
     display: flex;
     flex-flow: row;
     justify-content: space-evenly;
-    padding: 1.3rem;
+    padding: 1.1rem 4.5rem 1.4rem;
     a {
       &:hover {
         transform: scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(255, 45, 172, 0.65));
       }
       img {
         height: 20px;
@@ -158,13 +222,13 @@
     z-index: 7;
 
     @supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
-      background: rgba(36, 39, 41, 0.1);
-      backdrop-filter: blur(40px);
+      background: rgba(3, 9, 24, 0.86);
+      backdrop-filter: blur(24px);
     }
   
     /* slightly transparent fallback for Firefox (not supporting backdrop-filter) */
     @supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
-      background: #181B1C;
+      background: #050b19;
     }
   }
 }

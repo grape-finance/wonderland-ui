@@ -16,7 +16,7 @@ export async function getMarketPrice() {
 
     const wMemoPrice = reserves[1] / reserves[0];
 
-    const wMemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    const wMemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
     const timeValue = await wMemoContract.wMEMOToMEMO(ethers.utils.parseEther("1"));
     const timePrice = wMemoPrice / (timeValue * Math.pow(10, -9));
 

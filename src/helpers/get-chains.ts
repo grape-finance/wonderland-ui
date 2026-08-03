@@ -1,4 +1,4 @@
-import { Networks, NetworksInfo, WMEMO_BRIDG_CHAINS } from "../constants/blockchain";
+import { Networks, NetworksInfo, QUASAR_BRIDGE_CHAINS } from "../constants/blockchain";
 
 export const getChainInfo = (chain: Networks) => {
     const info = NetworksInfo[chain];
@@ -10,7 +10,7 @@ export const getChainInfo = (chain: Networks) => {
 
 export const getChainList = (notInclude?: Networks) => {
     const list = [];
-    for (const chain of WMEMO_BRIDG_CHAINS) {
+    for (const chain of QUASAR_BRIDGE_CHAINS) {
         if (notInclude && chain === notInclude) {
             continue;
         }

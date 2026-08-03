@@ -26,13 +26,13 @@ export const changeApproval = createAsyncThunk("wrapping/changeApproval", async 
 
     const addresses = getAddresses(networkID);
     const signer = provider.getSigner();
-    const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, wMemoTokenContract, signer);
+    const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, wMemoTokenContract, signer);
 
     let approveTx;
     try {
         const gasPrice = await getGasPrice(provider);
 
-        approveTx = await memoContract.approve(addresses.WMEMO_ADDRESS, ethers.constants.MaxUint256, { gasPrice });
+        approveTx = await memoContract.approve(addresses.WRAPPED_QUASAR_ADDRESS, ethers.constants.MaxUint256, { gasPrice });
 
         const text = "Approve Wrapping";
         const pendingTxnType = "approve_wrapping";
@@ -50,7 +50,7 @@ export const changeApproval = createAsyncThunk("wrapping/changeApproval", async 
 
     await sleep(2);
 
-    const memoAllowance = await memoContract.allowance(address, addresses.WMEMO_ADDRESS);
+    const memoAllowance = await memoContract.allowance(address, addresses.WRAPPED_QUASAR_ADDRESS);
 
     return dispatch(
         fetchAccountSuccess({
@@ -78,7 +78,7 @@ export const changeWrap = createAsyncThunk("wrapping/changeWrap", async ({ isWra
     const addresses = getAddresses(networkID);
     const signer = provider.getSigner();
     const amountInWei = isWrap ? ethers.utils.parseUnits(value, "gwei") : ethers.utils.parseEther(value);
-    const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, signer);
+    const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, signer);
 
     let wrapTx;
 
@@ -124,7 +124,7 @@ const calcWrapValue = async ({ isWrap, value, provider, networkID }: IWrapDetail
 
     let wrapValue = 0;
 
-    const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
 
     if (isWrap) {
         const wmemoValue = await wmemoContract.MEMOTowMEMO(amountInWei);

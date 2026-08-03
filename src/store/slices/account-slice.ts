@@ -40,18 +40,18 @@ export const getBalances = createAsyncThunk("account/getBalances", async ({ addr
     let wmemoBalance = 0;
     let wMemoStaked = 0;
 
-    if (addresses.MEMO_ADDRESS) {
-        const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, MemoTokenContract, provider);
+    if (addresses.QUASAR_ADDRESS) {
+        const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
         memoBalance = await memoContract.balanceOf(address);
     }
 
-    if (addresses.TIME_ADDRESS) {
-        const timeContract = new ethers.Contract(addresses.TIME_ADDRESS, TimeTokenContract, provider);
+    if (addresses.PULSAR_ADDRESS) {
+        const timeContract = new ethers.Contract(addresses.PULSAR_ADDRESS, TimeTokenContract, provider);
         timeBalance = await timeContract.balanceOf(address);
     }
 
-    if (addresses.WMEMO_ADDRESS) {
-        const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    if (addresses.WRAPPED_QUASAR_ADDRESS) {
+        const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
         wmemoBalance = await wmemoContract.balanceOf(address);
     }
 
@@ -83,16 +83,16 @@ interface IAccountStaking {
 export const getStaking = createAsyncThunk("account/getStaking", async ({ address, networkID, provider }: IGetBalances): Promise<IAccountStaking> => {
     const addresses = getAddresses(networkID);
 
-    const timeContract = new ethers.Contract(addresses.TIME_ADDRESS, TimeTokenContract, provider);
+    const timeContract = new ethers.Contract(addresses.PULSAR_ADDRESS, TimeTokenContract, provider);
     const time = await timeContract.allowance(address, addresses.STAKING_HELPER_ADDRESS);
 
-    const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, MemoTokenContract, provider);
+    const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
     const memo = await memoContract.allowance(address, addresses.STAKING_ADDRESS);
 
     // FARM_ADDRESS may not be deployed on all networks (e.g. testnet)
     let wMemo = ethers.BigNumber.from(0);
-    if (addresses.WMEMO_ADDRESS && addresses.FARM_ADDRESS) {
-        const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    if (addresses.WRAPPED_QUASAR_ADDRESS && addresses.FARM_ADDRESS) {
+        const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
         wMemo = await wmemoContract.allowance(address, addresses.FARM_ADDRESS);
     }
 
@@ -159,24 +159,24 @@ export const loadAccountDetails = createAsyncThunk("account/loadAccountDetails",
 
     const addresses = getAddresses(networkID);
 
-    if (addresses.TIME_ADDRESS) {
-        const timeContract = new ethers.Contract(addresses.TIME_ADDRESS, TimeTokenContract, provider);
+    if (addresses.PULSAR_ADDRESS) {
+        const timeContract = new ethers.Contract(addresses.PULSAR_ADDRESS, TimeTokenContract, provider);
         timeBalance = await timeContract.balanceOf(address);
         stakeAllowance = await timeContract.allowance(address, addresses.STAKING_HELPER_ADDRESS);
     }
 
-    if (addresses.MEMO_ADDRESS) {
-        const memoContract = new ethers.Contract(addresses.MEMO_ADDRESS, MemoTokenContract, provider);
+    if (addresses.QUASAR_ADDRESS) {
+        const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
         memoBalance = await memoContract.balanceOf(address);
         unstakeAllowance = await memoContract.allowance(address, addresses.STAKING_ADDRESS);
 
-        if (addresses.WMEMO_ADDRESS) {
-            memoWmemoAllowance = await memoContract.allowance(address, addresses.WMEMO_ADDRESS);
+        if (addresses.WRAPPED_QUASAR_ADDRESS) {
+            memoWmemoAllowance = await memoContract.allowance(address, addresses.WRAPPED_QUASAR_ADDRESS);
         }
     }
 
-    if (addresses.WMEMO_ADDRESS) {
-        const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    if (addresses.WRAPPED_QUASAR_ADDRESS) {
+        const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
         wmemoBalance = await wmemoContract.balanceOf(address);
 
         if (addresses.ANYSWAP_ADDRESS) {
@@ -273,7 +273,7 @@ export const calculateUserBondDetails = createAsyncThunk("account/calculateUserB
 
     const bondContract = bond.getContractForBond(networkID, provider);
     const reserveContract = bond.getContractForReserve(networkID, provider);
-    const wMemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    const wMemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
 
     let interestDue, pendingPayout, bondMaturationBlock, interestDueWrapped, pendingPayoutWrapped;
 
@@ -304,8 +304,8 @@ export const calculateUserBondDetails = createAsyncThunk("account/calculateUserB
 
     const pendingPayoutVal = bond.v2Bond ? ethers.utils.formatEther(pendingPayout) : ethers.utils.formatUnits(pendingPayout, "gwei");
 
-    // Compute wMEMO equivalent for both mainnet and testnet
-    if (!bond.v2Bond && addresses.WMEMO_ADDRESS) {
+    // Compute QUASAR equivalent for both mainnet and testnet
+    if (!bond.v2Bond && addresses.WRAPPED_QUASAR_ADDRESS) {
         pendingPayoutWrapped = (await wMemoContract.MEMOTowMEMO(pendingPayout)) / Math.pow(10, 18);
     }
 
@@ -466,7 +466,7 @@ export const calculateUserRewardDetails = createAsyncThunk("account/calculateUse
     const farmContract = new ethers.Contract(addresses.FARM_ADDRESS, FarmContract, provider);
     const wmemoPrice = (await getWmemoMarketPrice()) * Math.pow(10, 18);
     const wmemoValue = BigNumber.from("1000000000000000000000").mul("1000000000000000000").div(trim(wmemoPrice));
-    const wmemoContract = new ethers.Contract(addresses.WMEMO_ADDRESS, wMemoTokenContract, provider);
+    const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
     const wmemoStaked = await wmemoContract.balanceOf(addresses.FARM_ADDRESS);
 
     const tokenAddresses: string[] = [];

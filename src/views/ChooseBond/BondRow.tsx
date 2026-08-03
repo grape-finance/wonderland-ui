@@ -76,7 +76,7 @@ export function BondDataCard({ bond }: IBondProps) {
                 </div>
                 <Link component={NavLink} to={`/mints/${bond.name}`}>
                     <div className={classNames("bond-table-btn", { deprecated: bond.deprecated })}>
-                        <p>{bond.v2Bond ? "Buy wMEMO" : `Mint ${bond.displayName}`}</p>
+                        <p>{bond.v2Bond ? "Buy QUASAR" : `Mint ${bond.displayName}`}</p>
                     </div>
                 </Link>
             </Paper>
@@ -129,7 +129,7 @@ export function BondTableData({ bond }: IBondProps) {
             <TableCell>
                 <Link component={NavLink} to={`/mints/${bond.name}`}>
                     <div className={classNames("bond-table-btn", { deprecated: bond.deprecated })}>
-                        <p>{bond.v2Bond ? "Buy wMEMO" : "Mint"}</p>
+                        <p>{bond.v2Bond ? "Buy QUASAR" : "Mint"}</p>
                     </div>
                 </Link>
             </TableCell>

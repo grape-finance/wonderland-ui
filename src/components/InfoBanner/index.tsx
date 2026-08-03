@@ -16,11 +16,11 @@ function LiquidityBanner() {
     return (
         <div className="liquidity-banner-root">
             <div className="liquidity-banner-text-conteiner">
-                <p className="liquidity-banner-text">Rebases have ended as per WIP 17, please now wrap your</p>
-                <p className="liquidity-banner-text">MEMO to wMEMO and take advantage of our farm.</p>
+                <p className="liquidity-banner-text">Explore the Pulsar Protocol documentation</p>
+                <p className="liquidity-banner-text">for product guides and protocol resources.</p>
                 <p className="liquidity-banner-text upper">
                     More info{" "}
-                    <a target="_blank" href="https://www.wonderlandforum.xyz/t/wip-17-stopping-rebases/19100">
+                    <a target="_blank" rel="noreferrer" href="https://source-code-systems.gitbook.io/pulsarprotocol">
                         here
                     </a>
                 </p>

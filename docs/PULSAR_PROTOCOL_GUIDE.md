@@ -1,6 +1,6 @@
-# Wonderland Protocol — Full Guide
+# Pulsar Protocol — Full Guide
 
-This document covers the **concepts**, **on-chain mechanics**, and **complete frontend (UI) functionality** for the Wonderland protocol deployed on PulseChain. The UI is a React/Redux app and this guide traces every user-facing feature end-to-end.
+This document covers the **concepts**, **on-chain mechanics**, and **complete frontend (UI) functionality** for the Pulsar protocol deployed on PulseChain. The UI is a React/Redux app and this guide traces every user-facing feature end-to-end.
 
 ---
 
@@ -8,17 +8,17 @@ This document covers the **concepts**, **on-chain mechanics**, and **complete fr
 
 | Token | Role | Decimals | Contract |
 |-------|------|----------|----------|
-| **TIME** | Base protocol token. New TIME is minted by the treasury when reserves are deposited (bonds). | 9 | `TimeERC20Token` |
-| **MEMO** | Rebasing staking receipt (≈ sOHM in Olympus). Balance grows each epoch. | 9 | `MEMOries` |
-| **wMEMO** | Non-rebasing wrapper around MEMO. Holds a fixed share; each wMEMO is redeemable for more MEMO as the index rises. | 18 | `wMEMO` |
+| **PULSAR** | Base protocol token. New PULSAR is minted by the treasury when reserves are deposited (bonds). | 9 | `PulsarERC20Token` |
+| **QUASAR** | Rebasing staking receipt (≈ sOHM in Olympus). Balance grows each epoch. | 9 | `QuasarToken` |
+| **QUASAR** | Non-rebasing wrapper around QUASAR. Holds a fixed share; each QUASAR is redeemable for more QUASAR as the index rises. | 18 | `QUASAR` |
 
 ### Olympus name equivalents
 
-| Olympus v1 | Wonderland |
+| Olympus v1 | Pulsar |
 |------------|------------|
-| OHM | TIME |
-| sOHM | MEMO |
-| gOHM | wMEMO |
+| OHM | PULSAR |
+| sOHM | QUASAR |
+| gOHM | QUASAR |
 
 ---
 
@@ -28,13 +28,13 @@ This document covers the **concepts**, **on-chain mechanics**, and **complete fr
 
 - Time is divided into **epochs** (configured as 8 hours on PulseChain testnet).
 - At the end of each epoch, `staking.rebase()` is called (triggered by the first stake/unstake/redeem after the epoch ends).
-- `rebase()` calls `distributor.distribute()` which **mints new TIME** to the staking contract.
-- The staking contract then updates `epoch.distribute` = surplus TIME available for the next rebase.
+- `rebase()` calls `distributor.distribute()` which **mints new PULSAR** to the staking contract.
+- The staking contract then updates `epoch.distribute` = surplus PULSAR available for the next rebase.
 
 ### Staking Rebase
 
 ```
-stakingRebase = nextRewardFor(staking) / TIME.totalSupply()
+stakingRebase = nextRewardFor(staking) / PULSAR.totalSupply()
              = (totalSupply × rate / 1,000,000) / totalSupply
              = rate / 1,000,000
              = 5000 / 1,000,000 = 0.5% per epoch
@@ -50,9 +50,9 @@ APY = (1 + stakingRebase)^(365 × 3) - 1
 
 ### Index
 
-`staking.index()` is a monotonically increasing number that tracks total cumulative rebase growth since launch. It is used to convert between MEMO ↔ wMEMO:
-- `wMEMO → MEMO`: `memoAmount = wMemoAmount × index / 1e9`
-- `MEMO → wMEMO`: `wMemoAmount = memoAmount × 1e9 / index`
+`staking.index()` is a monotonically increasing number that tracks total cumulative rebase growth since launch. It is used to convert between QUASAR ↔ QUASAR:
+- `QUASAR → QUASAR`: `quasarAmount = wrappedQuasarAmount × index / 1e9`
+- `QUASAR → QUASAR`: `wrappedQuasarAmount = quasarAmount × 1e9 / index`
 
 ---
 
@@ -65,16 +65,16 @@ The dashboard reads on-chain data for PulseChain testnet and displays:
 
 | Field | Source | Formula |
 |-------|--------|---------|
-| **wMEMO Price** | `stakingContract.index()` × TIME price | `index × $1 = $1` at launch |
-| **Market Cap** | `memoContract.totalSupply()` × TIME price | `supply × $1` |
-| **TVL** | `memoContract.circulatingSupply()` × TIME price | `stakedMEMO × $1` |
-| **Treasury Balance** | `treasuryContract.totalReserves()` | Formatted as 9-dec TIME units |
-| **Backing per wMEMO** | On testnet: `0` (no RFV API) | mainnet uses external fund API |
+| **QUASAR Price** | `stakingContract.index()` × PULSAR price | `index × $1 = $1` at launch |
+| **Market Cap** | `quasarContract.totalSupply()` × PULSAR price | `supply × $1` |
+| **TVL** | `quasarContract.circulatingSupply()` × PULSAR price | `stakedQuasar × $1` |
+| **Treasury Balance** | `treasuryContract.totalReserves()` | Formatted as 9-dec PULSAR units |
+| **Backing per QUASAR** | On testnet: `0` (no RFV API) | mainnet uses external fund API |
 
 **Data flow:**
 1. `useWeb3Context` detects network and provider
 2. `loadAppDetails({ networkID, provider })` thunk is dispatched
-3. For `PULSE_TESTNET`: reads directly from staking, MEMO, treasury, and distributor contracts
+3. For `PULSE_TESTNET`: reads directly from staking, QUASAR, treasury, and distributor contracts
 4. State stored in Redux `app` slice, consumed by `TreasuryDashboard` component
 
 ---
@@ -89,39 +89,39 @@ The dashboard reads on-chain data for PulseChain testnet and displays:
 | Field | Value | Source |
 |-------|-------|--------|
 | APY | ~23,000% | `(1 + rebase)^1095 - 1` from `distributor.nextRewardFor` |
-| TVL | circulatingSupply × $1 | `memoContract.circulatingSupply()` |
+| TVL | circulatingSupply × $1 | `quasarContract.circulatingSupply()` |
 | Current Index | staking index | `stakingContract.index()` formatted in gwei |
-| Your Balance | TIME in wallet | `time.balanceOf(address)` |
-| Your Staked Balance | MEMO in wallet | `memo.balanceOf(address)` |
-| Wrapped Balance | wMEMO in wallet | `wmemo.balanceOf(address)` |
-| Exchange Rate | 1 wMEMO = N MEMO | `wmemo.wMEMOToMEMO(1e18)` |
-| Next Reward Amount | Upcoming MEMO rebase | `epoch.distribute` from staking |
+| Your Balance | PULSAR in wallet | `pulsar.balanceOf(address)` |
+| Your Staked Balance | QUASAR in wallet | `quasar.balanceOf(address)` |
+| Wrapped Balance | QUASAR in wallet | `wrappedQuasar.balanceOf(address)` |
+| Exchange Rate | 1 QUASAR = N QUASAR | wrapper conversion rate |
+| Next Reward Amount | Upcoming QUASAR rebase | `epoch.distribute` from staking |
 | Next Reward Yield | Next rebase % | `epoch.distribute / circulatingSupply` |
 | ROI (5-Day Rate) | 5-day compounded return | `(1 + rebase)^15 - 1` |
 
-### Stake tab (TIME → MEMO)
+### Stake tab (PULSAR → QUASAR)
 
-1. User enters TIME amount
-2. Clicks **Approve** → `time.approve(stakingHelper, MaxUint256)`
-3. Clicks **Stake TIME** → `stakingHelper.stake(amount, address)`
+1. User enters PULSAR amount
+2. Clicks **Approve** → `pulsar.approve(stakingHelper, MaxUint256)`
+3. Clicks **Stake PULSAR** → `stakingHelper.stake(amount, address)`
    - StakingHelper wraps stake + claim in one tx
-   - TIME transfers to staking contract
-   - MEMO minted to user
+   - PULSAR transfers to staking contract
+   - QUASAR minted to user
 
-### Unstake tab (MEMO → TIME)
+### Unstake tab (QUASAR → PULSAR)
 
-1. User enters MEMO amount
-2. Clicks **Approve** → `memo.approve(staking, MaxUint256)`
-3. Clicks **Unstake MEMO** → `staking.unstake(amount, rebase=false)`
-   - MEMO burns
-   - TIME returned to user
+1. User enters QUASAR amount
+2. Clicks **Approve** → `quasar.approve(staking, MaxUint256)`
+3. Clicks **Unstake QUASAR** → `staking.unstake(amount, rebase=false)`
+   - QUASAR burns
+   - PULSAR returned to user
 
-### Wrap / Unwrap (MEMO ↔ wMEMO)
+### Wrap / Unwrap (QUASAR ↔ QUASAR)
 
 Located below the main stake panel:
 
-- **Wrap:** `memo.approve(wmemo)` → `wmemo.wrap(memoAmount)`
-- **Unwrap:** `wmemo.unwrap(wMemoAmount)` → returns MEMO
+- **Wrap:** `quasar.approve(wrapper)` → `wrapper.wrap(quasarAmount)`
+- **Unwrap:** `wrapper.unwrap(wrappedQuasarAmount)` → returns QUASAR
 
 ---
 
@@ -137,7 +137,7 @@ Displays all active bonds. For each bond:
 | Column | Description |
 |--------|-------------|
 | **Mint** | Token name + icon |
-| **Price** | USD cost to receive 1 TIME via this bond |
+| **Price** | USD cost to receive 1 PULSAR via this bond |
 | **ROI** | `(marketPrice − bondPrice) / bondPrice × 100` |
 | **Purchased** | Treasury balance of this reserve token |
 
@@ -154,13 +154,13 @@ Displays all active bonds. For each bond:
 ```
 bondPriceInUSD() = bondPrice() × 10^reserveDecimals / 100
                  = minimumPrice × 1e6 / 100
-minimumPrice = 100 → $1/TIME
+minimumPrice = 100 → $1/PULSAR
 ```
 
 **WPLS bond** (`EthBondDepository`):
 ```
 bondPriceInUSD() = bondPrice() × assetPrice(oracle) × 1e6
-UI formula: raw / 1e16 = USD/TIME
+UI formula: raw / 1e16 = USD/PULSAR
 minimumPrice = 100 × 1e8 / oraclePrice (calculated dynamically)
 ```
 
@@ -172,24 +172,24 @@ Opened by clicking **Mint** on a bond row.
 
 | Field | Description |
 |-------|-------------|
-| Mint Price | Bond price in USD per TIME |
-| wMEMO Price | Current wMEMO market price |
-| TIME Price | Current TIME market price ($1 on testnet) |
+| Mint Price | Bond price in USD per PULSAR |
+| QUASAR Price | Current QUASAR market price |
+| PULSAR Price | Current PULSAR market price ($1 on testnet) |
 
 #### Mint tab
 
 1. User enters amount of reserve token (e.g. `10 USDC`)
-2. UI calls `bondContract.payoutFor(amount)` to show **You Will Get** (TIME)
+2. UI calls `bondContract.payoutFor(amount)` to show **You Will Get** (PULSAR)
 3. **Approve** button: `reserveToken.approve(bondAddress, MaxUint256)`
    - Only needed once per bond
 4. **Mint** button: `bondContract.deposit(amount, maxPrice, address)`
    - `maxPrice` = `bondPrice() × (1 + slippage)` (default 0.5%)
-   - Treasury receives reserves, mints TIME to bond depository
+   - Treasury receives reserves, mints PULSAR to bond depository
    - Your vesting position is recorded on-chain
 
 **Validations:**
 - Amount > `maxBondPriceToken`: "Try minting less" error
-- Payout < 0.01 TIME: "Bond too small" error (contract minimum)
+- Payout < 0.01 PULSAR: "Bond too small" error (contract minimum)
 
 #### Redeem tab
 
@@ -197,17 +197,17 @@ Shows your **current vesting position** for that bond:
 
 | Field | Description |
 |-------|-------------|
-| Pending Rewards | TIME earned so far (vested portion) |
-| Claimable Rewards | TIME you can claim now |
+| Pending Rewards | PULSAR earned so far (vested portion) |
+| Claimable Rewards | PULSAR you can claim now |
 | Time Until Fully Vested | Remaining vesting time |
 | ROI | Discount you locked in at bond time |
 
 - **Claim** button: `bondContract.redeem(address, autostake=false)`
-  - Transfers vested TIME to wallet
+  - Transfers vested PULSAR to wallet
 - **Claim and Autostake** button: `bondContract.redeem(address, autostake=true)`
-  - Claims + immediately stakes TIME → you receive MEMO
+  - Claims + immediately stakes PULSAR → you receive QUASAR
 
-**Important:** The original deposited asset (USDC/WPLS) **cannot be retrieved**. It is permanently held by the treasury. You receive TIME in return.
+**Important:** The original deposited asset (USDC/WPLS) **cannot be retrieved**. It is permanently held by the treasury. You receive PULSAR in return.
 
 ### Bond Vesting
 
@@ -229,7 +229,7 @@ A simulation tool for projecting staking returns. **Not a guarantee.**
 
 | Field | Default | Description |
 |-------|---------|-------------|
-| wMEMO Amount | Your wMEMO balance | How many wMEMO you hold |
+| QUASAR Amount | Your QUASAR balance | How many QUASAR you hold |
 | APY (%) | Current staking APY | Expected annual return |
 | Days | Slider (1–365) | Projection horizon |
 
@@ -237,20 +237,20 @@ A simulation tool for projecting staking returns. **Not a guarantee.**
 
 ```
 epochRate = (1 + APY)^(1/1095) - 1      // per-epoch rate from APY
-initialMEMO = wMEMOAmount × wMEMOtoMEMORate  // convert to MEMO units
+initialQuasar = quasarAmount × quasarConversionRate
 
-balance = initialMEMO
+balance = initialQuasar
 for each epoch in (days × 3):
     balance += balance × epochRate
 
-potentialWealth = balance × wMEMOPrice   // convert back to USD
+potentialWealth = balance × quasarPrice
 ```
 
 ### Outputs
 
 | Field | Description |
 |-------|-------------|
-| Current Wealth | `wMEMOAmount × wMEMOPrice` |
+| Current Wealth | `quasarAmount × quasarPrice` |
 | Potential Wealth | Projected USD value after compounding |
 | Potential Lambos | `floor(potentialWealth / 220,000)` |
 
@@ -260,12 +260,12 @@ potentialWealth = balance × wMEMOPrice   // convert back to USD
 
 **Route:** `/wrap` (if enabled)
 
-Standalone interface for MEMO ↔ wMEMO conversion.
+Standalone interface for QUASAR ↔ QUASAR conversion.
 
-- **Wrap:** Enter MEMO → approve → `wmemo.wrap(amount)` → receive wMEMO
-- **Unwrap:** Enter wMEMO → `wmemo.unwrap(amount)` → receive MEMO
+- **Wrap:** Enter QUASAR → approve → `wrapper.wrap(amount)` → receive QUASAR
+- **Unwrap:** Enter QUASAR → `wrapper.unwrap(amount)` → receive QUASAR
 
-Exchange rate displayed: `1 wMEMO = N MEMO` (increases over time as index grows).
+Exchange rate displayed: `1 QUASAR = N QUASAR` (increases over time as index grows).
 
 ---
 
@@ -296,7 +296,7 @@ src/
 │   └── index.ts              ← Bond instances + exports (usdcBond, wplsBond, ...)
 │
 ├── store/slices/
-│   ├── app-slice.ts          ← Global metrics (APY, TVL, wMEMO price, treasury)
+│   ├── app-slice.ts          ← Global metrics (APY, TVL, QUASAR price, treasury)
 │   ├── account-slice.ts      ← Per-address balances + allowances + bond positions
 │   ├── bond-slice.ts         ← Bond price, quote, discount calculation + deposit/redeem
 │   ├── stake-slice.ts        ← Stake / unstake / wrap / unwrap actions
@@ -333,13 +333,13 @@ Feature availability per network is controlled in `constants/view.ts`:
 
 | Feature | Mainnet | PulseChain Testnet |
 |---------|---------|-------------------|
-| TIME price | From DEX LP (PulseX) | Hardcoded `$1` |
+| PULSAR price | From DEX LP (PulseX) | Hardcoded `$1` |
 | APY source | `epoch.distribute / circ` | `distributor.nextRewardFor / totalSupply` |
 | Treasury data | Zapper API + on-chain | `treasury.totalReserves()` on-chain only |
 | Bonds | Legacy MIM, AVAX, LP | USDC + WPLS |
 | Oracles | Live DEX prices | Mock fixed-price oracles |
 | Farm | Enabled | Disabled |
-| wMEMO backing | RFV from fund API | `0` |
+| QUASAR backing | RFV from fund API | `0` |
 
 ---
 
@@ -347,9 +347,9 @@ Feature availability per network is controlled in `constants/view.ts`:
 
 | Contract | Address |
 |----------|---------|
-| TIME | `0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1` |
-| MEMO | `0x86D77b0A5bf68ADbb5Eb1A9a99695FA5d61EFc41` |
-| wMEMO | `0x5B88d6Ca0e66b6E0B7e0c0a9aE5dF344d10e4a66` |
+| PULSAR | `0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1` |
+| QUASAR | `0x86D77b0A5bf68ADbb5Eb1A9a99695FA5d61EFc41` |
+| QUASAR | `0x5B88d6Ca0e66b6E0B7e0c0a9aE5dF344d10e4a66` |
 | MockUSDC | `0x9131d71A23e0cdd8F0086ea525D1076B72a749eD` |
 | WPLS | `0x70499adEBB11Efd915E3b69E700c331778628707` |
 | Treasury | `0xB2Aa7B8f75E6faD5d3a855fC49a6E7Acf07EeCD` |
@@ -370,7 +370,7 @@ Feature availability per network is controlled in `constants/view.ts`:
 | APY shows 0% | `epoch.distribute` stale (pre-epoch) | Use `distributor.nextRewardFor` for display |
 | APY shows astronomical number | Very few tokens staked (per-staker rate explodes) | Divide by `totalSupply` not `circulatingSupply` |
 | Bond price wrong | Stale `minimumPrice` on contract | Run `scripts/setMinPrice.js` |
-| "Bond too small" error | Payout < 0.01 TIME minimum | Enter larger amount (need ≥ 0.01 TIME payout) |
+| "Bond too small" error | Payout < 0.01 PULSAR minimum | Enter larger amount (need ≥ 0.01 PULSAR payout) |
 | "Approve" button stuck | Allowance not picked up after tx | Hard refresh; account-slice re-reads allowance |
-| wMEMO price = $10 | Old hardcoded TIME price | Set `timePrice = 1` in `app-slice.ts` |
+| QUASAR price = $10 | Old hardcoded PULSAR price | Set `pulsarPrice = 1` in `app-slice.ts` |
 | LP ROI negative | LP pool has wrong ratio (10:1 vs 1:1) | Run `scripts/fixLP.js` or adjust `minimumPrice` |

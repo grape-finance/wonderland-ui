@@ -9,7 +9,7 @@ import { trim } from "../../helpers";
 import classnames from "classnames";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
 import Wrap from "../../components/Wrap";
-import MemoIcon from "../../assets/tokens/MEMO.png";
+import MemoIcon from "../../assets/tokens/QUASAR.png";
 import Accordion from "../../components/Accordion";
 import { changeApproval, changeStake, getReward } from "../../store/slices/farm-thunk";
 import { ITokenReward, IUserRewardsDetail } from "../../store/slices/account-slice";
@@ -141,7 +141,7 @@ function Farm() {
 
                                 <Grid item xs={12} sm={6}>
                                     <div className="farm-card-tvl">
-                                        <p className="farm-card-metrics-title">Staked wMEMO</p>
+                                        <p className="farm-card-metrics-title">Staked QUASAR</p>
                                         <p className="farm-card-metrics-value">{trimmedStakedTotalwMemo ? trimmedStakedTotalwMemo : <Skeleton width="150px" />}</p>
                                     </div>
                                 </Grid>
@@ -155,7 +155,7 @@ function Farm() {
                                 <div className="farm-card-wallet-connect-btn" onClick={connect}>
                                     <p>Connect Wallet</p>
                                 </div>
-                                <p className="farm-card-wallet-desc-text">Connect your wallet to stake wMEMO tokens!</p>
+                                <p className="farm-card-wallet-desc-text">Connect your wallet to stake QUASAR tokens!</p>
                             </div>
                         )}
                         {address && (
@@ -197,7 +197,7 @@ function Farm() {
                                                             onChangeStake("stake");
                                                         }}
                                                     >
-                                                        <p>{txnButtonText(pendingTransactions, "farm_staking", "Stake wMEMO")}</p>
+                                                        <p>{txnButtonText(pendingTransactions, "farm_staking", "Stake QUASAR")}</p>
                                                     </div>
                                                 ) : (
                                                     <div
@@ -222,7 +222,7 @@ function Farm() {
                                                         onChangeStake("unstake");
                                                     }}
                                                 >
-                                                    <p>{txnButtonText(pendingTransactions, "farm_unstaking", "Unstake wMEMO")}</p>
+                                                    <p>{txnButtonText(pendingTransactions, "farm_unstaking", "Unstake QUASAR")}</p>
                                                 </div>
                                             </div>
                                         )}
@@ -242,7 +242,7 @@ function Farm() {
                                         <div className="farm-token-img">
                                             <img alt="" src={MemoIcon} />
                                         </div>
-                                        <p className="farm-staked-balance-title">Your Staked wMEMO</p>
+                                        <p className="farm-staked-balance-title">Your Staked QUASAR</p>
                                         <p className="farm-staked-balance-value">{trimmedStakedWmemoBalance}</p>
                                     </div>
                                     <Accordion title="Projected pool APR">

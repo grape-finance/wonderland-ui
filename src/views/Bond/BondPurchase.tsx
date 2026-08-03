@@ -27,7 +27,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
     const [showError, setShowError] = useState(false);
     const [tooSmall, setTooSmall] = useState(false);
 
-    // Minimum payout enforced by the contract: 0.01 TIME for v1, 0.0001 for v2
+    // Minimum payout enforced by the contract: 0.01 PULSAR for v1, 0.0001 for v2
     const MIN_PAYOUT = bond.v2Bond ? 0.0001 : 0.01;
 
     const isBondLoading = useSelector<IReduxState, boolean>(state => state.bonding.loading ?? true);
@@ -46,7 +46,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
         if (bond.deprecated || bond.soldOut) return;
         if (Number(quantity) > bond.maxBondPriceToken) return;
         if (tooSmall) {
-            dispatch(warning({ text: `Bond too small — minimum payout is ${MIN_PAYOUT} TIME. Please increase the amount.` }));
+            dispatch(warning({ text: `Bond too small — minimum payout is ${MIN_PAYOUT} PULSAR. Please increase the amount.` }));
             return;
         }
         if (quantity === "") {
@@ -142,7 +142,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
     const isShowZap = bond.disableZap ? false : !bond.deprecated;
 
-    const displeyToken = "TIME";
+    const displeyToken = "PULSAR";
 
     return (
         <Box display="flex" flexDirection="column">
@@ -178,7 +178,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                     )}
                     {tooSmall && !showError && (
                         <div className="bond-input-error">
-                            <p>Bond too small — you will receive {trim(bond.bondQuote, 4)} TIME but the minimum is {MIN_PAYOUT} TIME. Enter a larger amount.</p>
+                            <p>Bond too small — you will receive {trim(bond.bondQuote, 4)} PULSAR but the minimum is {MIN_PAYOUT} PULSAR. Enter a larger amount.</p>
                         </div>
                     )}
                 </FormControl>
@@ -250,7 +250,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
                     <div className="data-row">
                         <p className="bond-balance-title grey">You Will Get</p>
-                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.bondQuoteWrapped, 8)} wMEMO`}</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.bondQuoteWrapped, 8)} QUASAR`}</p>
                     </div>
 
                     <div className={`data-row`}>
@@ -262,7 +262,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
                     <div className="data-row">
                         <p className="bond-balance-title grey">Max You Can Buy</p>
-                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.maxBondPriceWrapped, 8)} wMEMO`}</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.maxBondPriceWrapped, 8)} QUASAR`}</p>
                     </div>
 
                     <div className="data-row">

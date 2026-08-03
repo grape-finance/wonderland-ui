@@ -51,10 +51,10 @@ function Wrap({ open, handleClose }: IAdvancedSettingsProps) {
                 </div>
                 <div className="stake-card-action-stage-btns-wrap">
                     <div onClick={changeView(0)} className={classnames("stake-card-action-stage-btn", { active: !view })}>
-                        <p>TIME to MEMO</p>
+                        <p>PULSAR to QUASAR</p>
                     </div>
                     <div onClick={changeView(1)} className={classnames("stake-card-action-stage-btn", { active: view })}>
-                        <p>MEMO to wMEMO</p>
+                        <p>QUASAR to QUASAR</p>
                     </div>
                 </div>
                 {view === 0 && (

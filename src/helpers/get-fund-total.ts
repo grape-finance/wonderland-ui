@@ -1,4 +1,4 @@
-import { DEBANK_CHAIN_LIST, WONDERLAND_TREASURY_BALANCE, ZAPPER_BALANCES_URL } from "../constants";
+import { DEBANK_CHAIN_LIST, PULSAR_TREASURY_BALANCE, ZAPPER_BALANCES_URL } from "../constants";
 import { IZapperData } from "../hooks/useZapper";
 import { AssetType, calcByType, HIDE_TOKENS } from "./zapper";
 import { getWallet } from "./customData";
@@ -30,7 +30,7 @@ import axios from "axios";
 export const getFundTotal = async (): Promise<any> => {
     // const customWallet = await getWallet();
     // const chainList = await axios.get(DEBANK_CHAIN_LIST);
-    const { data } = await axios.get(WONDERLAND_TREASURY_BALANCE);
+    const { data } = await axios.get(PULSAR_TREASURY_BALANCE);
 
     //@ts-ignore
     // const rawZapperData: IZapperData[] = parsed(data);

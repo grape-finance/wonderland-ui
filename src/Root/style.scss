@@ -1,5 +1,15 @@
 @import "../assets/styles/fonts.scss";
 
+:root {
+  --pulsar-cyan: #16b9ff;
+  --pulsar-blue: #1268ff;
+  --pulsar-pulse: #ff2dac;
+  --pulsar-violet: #7a5cff;
+  --pulsar-deep: #030815;
+  --pulsar-panel: rgba(7, 17, 38, 0.74);
+  --pulsar-border: rgba(77, 194, 255, 0.2);
+}
+
 * {
   outline: none;
   box-sizing: border-box;
@@ -8,7 +18,7 @@
 html,
 body,
 #root {
-  font-family: "Square";
+  font-family: Manrope, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
@@ -17,6 +27,68 @@ body,
 body {
   margin: 0;
   box-sizing: border-box;
+  background: var(--pulsar-deep);
+  color: #f5f8ff;
+  font-family: Manrope, sans-serif;
+}
+
+::selection {
+  color: #020713;
+  background: #59cbff;
+}
+
+.dashboard-card,
+.stake-card,
+.calculator-card,
+.choose-bond-view-card,
+.bond-card,
+.fund-card,
+.farm-card,
+.redemption-card {
+  border: 1px solid var(--pulsar-border) !important;
+  background: linear-gradient(145deg, rgba(10, 25, 55, 0.82), rgba(4, 10, 26, 0.7)) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(26px) !important;
+  transition: border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+}
+
+.dashboard-card:hover,
+.bond-data-card:hover,
+.choose-bond-view-card:hover {
+  border-color: rgba(255, 45, 172, 0.3) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3), 0 0 30px rgba(122, 92, 255, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 45, 172, 0.55) !important;
+  box-shadow: 0 0 18px rgba(122, 92, 255, 0.12);
+}
+
+.MuiSlider-thumb {
+  box-shadow: 0 0 18px rgba(255, 45, 172, 0.24) !important;
+}
+
+.MuiTooltip-tooltip,
+.MuiMenu-paper,
+.MuiPopover-paper {
+  border: 1px solid rgba(122, 92, 255, 0.22) !important;
+}
+
+button,
+[class*="-btn"] {
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 input::-webkit-outer-spin-button,
@@ -56,7 +128,7 @@ p{
         }
 
         .web3modal-provider-name{
-          font-family: Montserrat SemiBold;
+          font-family: Oxanium;
           font-weight: 600;
           font-size: 24px;
           text-align: center;
@@ -64,7 +136,7 @@ p{
         }
 
         .web3modal-provider-description{
-          font-family: Montserrat Light;
+          font-family: Manrope;
           font-weight: 300;
           font-size: 14px;
           text-align: center;
@@ -108,7 +180,7 @@ p{
       p{
         margin-left: 24px;
 
-        font-family: Montserrat SemiBold;
+        font-family: Oxanium;
         font-style: normal;
         font-weight: 600;
         font-size: 20px;
@@ -143,7 +215,7 @@ p{
       }
 
       a{
-        font-family: Montserrat SemiBold;
+        font-family: Oxanium;
         font-style: normal;
         font-weight: 600;
         font-size: 18px;
@@ -169,7 +241,7 @@ p{
     }
 
     .walletconnect-qrcode__text{
-      font-family: Montserrat Light;
+      font-family: Manrope;
       font-style: normal;
       font-weight: 300;
       font-size: 14px;
@@ -184,7 +256,7 @@ p{
     }
 
     .walletconnect-modal__footer{
-      font-family: Montserrat Light;
+      font-family: Manrope;
       font-weight: 300;
       font-size: 14px;
       text-align: center;
@@ -193,7 +265,7 @@ p{
 
     .walletconnect-modal__base__row{
       h3{
-        font-family: Montserrat SemiBold;
+        font-family: Oxanium;
         font-style: normal;
         font-weight: 600;
         font-size: 20px;

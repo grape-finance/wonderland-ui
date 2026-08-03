@@ -79,7 +79,7 @@ const connectors = connectorsForWallets([
             metaMaskWallet({ chains, projectId }),
             rabbyWallet({ chains }),
             walletConnectWallet({ chains, projectId }),
-            coinbaseWallet({ chains, appName: "Wonderland Finance" }),
+            coinbaseWallet({ chains, appName: "Pulsar Protocol" }),
         ],
     },
 ]);

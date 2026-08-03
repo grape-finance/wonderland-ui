@@ -4,8 +4,23 @@
   align-items: center;
   margin: auto;
 
+  .connect-button,
+  .network-menu-btn {
+    background: linear-gradient(135deg, rgba(16, 166, 255, 0.2), rgba(12, 62, 145, 0.22));
+    border: 1px solid rgba(88, 204, 255, 0.32);
+    box-shadow: 0 10px 30px rgba(0, 82, 190, 0.18), inset 0 1px rgba(255, 255, 255, 0.07);
+    transition: 180ms ease;
+
+    &:hover {
+      border-color: rgba(255, 45, 172, 0.38);
+      box-shadow: 0 10px 30px rgba(0, 82, 190, 0.16), 0 0 24px rgba(122, 92, 255, 0.12);
+      transform: translateY(-1px);
+    }
+  }
+
   .dapp-topbar-slider-btn{
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(7, 25, 54, 0.8);
+    border: 1px solid rgba(74, 193, 255, 0.28);
     box-shadow: 0px 0px 10px rgba(44, 39, 109, 0.1);
     border-radius: 10px;
     padding: 10px;

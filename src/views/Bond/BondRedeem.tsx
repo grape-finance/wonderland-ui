@@ -58,7 +58,7 @@ function BondRedeem({ bond }: IBondRedeem) {
         return prettifySeconds(bondingState.vestingTerm, "day");
     };
 
-    const displeyToken = "TIME";
+    const displeyToken = "PULSAR";
 
     return (
         <Box display="flex" flexDirection="column">
@@ -94,7 +94,7 @@ function BondRedeem({ bond }: IBondRedeem) {
 
                     <div className="data-row">
                         <p className="bond-balance-title grey">Pending Rewards</p>
-                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.interestDueWrapped, 8)} wMEMO`}</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.interestDueWrapped, 8)} QUASAR`}</p>
                     </div>
 
                     <div className="data-row">
@@ -106,7 +106,7 @@ function BondRedeem({ bond }: IBondRedeem) {
 
                     <div className="data-row">
                         <p className="bond-balance-title grey">Claimable Rewards</p>
-                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.pendingPayoutWrapped, 8)} wMEMO`}</p>
+                        <p className="price-data bond-balance-title grey">{isBondLoading ? <Skeleton width="100px" /> : `${trim(bond.pendingPayoutWrapped, 8)} QUASAR`}</p>
                     </div>
 
                     <div className="data-row">
