@@ -237,6 +237,36 @@
     }
   }
 
+  .mock-faucet {
+    width: 100%;
+    margin-top: 10px;
+    text-align: center;
+
+    .mock-faucet-button {
+      padding: 9px 16px;
+      border: 1px solid rgba(41, 190, 255, 0.65);
+      border-radius: 8px;
+      background: rgba(41, 190, 255, 0.12);
+      color: #FFFFFF;
+      font-family: Oxanium;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:disabled {
+        cursor: default;
+        opacity: 0.6;
+      }
+    }
+
+    p {
+      margin: 7px 0 0;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: Manrope;
+      font-size: 12px;
+    }
+  }
+
   .bond-balance-title {
     font-family: Oxanium;
     font-style: normal;

@@ -49,6 +49,9 @@ function Stake() {
     const stakingAPY = useSelector<IReduxState, number>(state => {
         return state.app.stakingAPY;
     });
+    const stakingAPYCapped = useSelector<IReduxState, boolean>(state => {
+        return state.app.stakingAPYCapped;
+    });
     const stakingTVL = useSelector<IReduxState, number>(state => {
         return state.app.stakingTVL;
     });
@@ -104,7 +107,11 @@ function Stake() {
 
     const trimmedMemoBalance = trim(Number(memoBalance), 6);
     const trimmedWmemoBalance = trim(Number(wmemoBalance), 6);
-    const trimmedStakingAPY = trim(stakingAPY * 100, 1);
+    const stakingAPYPercent = stakingAPY * 100;
+    const formattedStakingAPY = `${stakingAPYCapped ? ">" : ""}${new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(stakingAPYPercent)}%`;
     const stakingRebasePercentage = trim(stakingRebase * 100, 4);
     const nextRewardValue = trim((Number(stakingRebasePercentage) / 100) * Number(trimmedMemoBalance), 6);
 
@@ -115,7 +122,7 @@ function Stake() {
                     <Grid className="stake-card-grid" container direction="column" spacing={2}>
                         <Grid item>
                             <div className="stake-card-header">
-                                <p className="stake-card-header-title">PUSLAR Staking</p>
+                                <p className="stake-card-header-title">PULSAR Staking</p>
                                 <RebaseTimer />
                             </div>
                         </Grid>
@@ -125,9 +132,9 @@ function Stake() {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} sm={4} md={4} lg={4}>
                                         <div className="stake-card-apy">
-                                            <p className="stake-card-metrics-title">APY</p>
+                                            <p className="stake-card-metrics-title">Projected APY</p>
                                             <p className="stake-card-metrics-value">
-                                                {isAppLoading ? <Skeleton width="150px" /> : <>{new Intl.NumberFormat("en-US").format(Number(trimmedStakingAPY))}%</>}
+                                                {isAppLoading ? <Skeleton width="150px" /> : <>{formattedStakingAPY}</>}
                                             </p>
                                         </div>
                                     </Grid>

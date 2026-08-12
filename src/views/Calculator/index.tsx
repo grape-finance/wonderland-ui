@@ -8,6 +8,21 @@ import { Skeleton } from "@mui/material";
 import { useHistory } from "react-router-dom";
 import { usePathForNetwork, useWeb3Context } from "../../hooks";
 
+function formatUsdPrice(price: number): string {
+    if (!price || price <= 0) return "Unavailable";
+    if (price >= 1) return `$${trim(price, 2)}`;
+    if (price >= 0.01) return `$${trim(price, 4)}`;
+    return `$${price.toFixed(8)}`;
+}
+
+const LAMBO_REFERENCE_PRICE_USD = 220000;
+
+function formatLamboEquivalents(wealth: number): string {
+    const equivalents = wealth / LAMBO_REFERENCE_PRICE_USD;
+    if (!Number.isFinite(equivalents) || equivalents <= 0) return "0";
+    return equivalents < 1 ? equivalents.toFixed(4) : equivalents.toFixed(2);
+}
+
 function Calculator() {
     const history = useHistory();
     const { chainID } = useWeb3Context();
@@ -24,6 +39,9 @@ function Calculator() {
     const stakingAPY = useSelector<IReduxState, number>(state => {
         return state.app.stakingAPY;
     });
+    const stakingAPYCapped = useSelector<IReduxState, boolean>(state => {
+        return state.app.stakingAPYCapped;
+    });
     const wMemoBalance = useSelector<IReduxState, string>(state => {
         return state.account.balances && state.account.balances.wmemo;
     });
@@ -31,7 +49,11 @@ function Calculator() {
         return state.wrapping.prices && state.wrapping.prices.wmemoMemo;
     });
 
-    const trimmedStakingAPY = trim(stakingAPY * 100, 1);
+    const trimmedStakingAPY = trim(stakingAPY * 100, 2);
+    const formattedStakingAPY = `${stakingAPYCapped ? ">" : ""}${new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(stakingAPY * 100)}%`;
     const trimmedWMemoBalance = trim(Number(wMemoBalance), 6);
     const trimeMarketPrice = trim(wMemoMarketPrice, 2);
     const trimeTimePrice = trim(timeMarketPrice, 2);
@@ -42,12 +64,20 @@ function Calculator() {
 
     const [potentialReturn, setPotentialReturn] = useState("0");
 
+    useEffect(() => {
+        setWMemoAmount(trimmedWMemoBalance);
+    }, [trimmedWMemoBalance]);
+
+    useEffect(() => {
+        setRewardYield(trimmedStakingAPY);
+    }, [trimmedStakingAPY]);
+
     const currentWealth = useMemo(() => {
         const wmemo = Number(wmemoAmount) || 0;
         const price = parseFloat(trimeMarketPrice);
         const amount = wmemo * price;
         return trim(amount, 2);
-    }, [wmemoAmount]);
+    }, [wmemoAmount, trimeMarketPrice]);
 
     const calcNewBalance = () => {
         const apy = parseFloat(rewardYield) / 100;
@@ -65,7 +95,7 @@ function Calculator() {
         const newBalance = calcNewBalance();
         const newPotentialReturn = newBalance * (parseFloat(trimeTimePrice) || 0);
         setPotentialReturn(trim(newPotentialReturn, 2));
-    }, [days, rewardYield, wmemoAmount]);
+    }, [days, rewardYield, wmemoAmount, wrapPrice, trimeTimePrice]);
 
     return (
         <div className="calculator-view">
@@ -84,14 +114,14 @@ function Calculator() {
                                     <Grid item xs={12} sm={4} md={4} lg={4}>
                                         <div className="calculator-card-apy">
                                             <p className="calculator-card-metrics-title">QUASAR Price</p>
-                                            <p className="calculator-card-metrics-value">{isAppLoading ? <Skeleton width="100px" /> : `$${trimeMarketPrice}`}</p>
+                                            <p className="calculator-card-metrics-value">{isAppLoading ? <Skeleton width="100px" /> : formatUsdPrice(wMemoMarketPrice)}</p>
                                         </div>
                                     </Grid>
                                     <Grid item xs={6} sm={4} md={4} lg={4}>
                                         <div className="calculator-card-tvl">
-                                            <p className="calculator-card-metrics-title">Current APY</p>
+                                            <p className="calculator-card-metrics-title">Projected APY</p>
                                             <p className="calculator-card-metrics-value">
-                                                {isAppLoading ? <Skeleton width="100px" /> : <>{new Intl.NumberFormat("en-US").format(Number(trimmedStakingAPY))}%</>}
+                                                {isAppLoading ? <Skeleton width="100px" /> : <>{formattedStakingAPY}</>}
                                             </p>
                                         </div>
                                     </Grid>
@@ -165,8 +195,8 @@ function Calculator() {
                                         <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>${potentialReturn}</>}</p>
                                     </div>
                                     <div className="data-row">
-                                        <p className="data-row-name">Potential number of lambos</p>
-                                        <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{Math.floor(Number(potentialReturn) / 220000)}</>}</p>
+                                        <p className="data-row-name">Potential Lamborghini equivalents ($220k each)</p>
+                                        <p className="data-row-value">{isAppLoading ? <Skeleton width="80px" /> : <>{formatLamboEquivalents(Number(potentialReturn))}</>}</p>
                                     </div>
                                 </div>
                             </div>

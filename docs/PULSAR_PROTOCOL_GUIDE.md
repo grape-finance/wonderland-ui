@@ -26,7 +26,7 @@ This document covers the **concepts**, **on-chain mechanics**, and **complete fr
 
 ### Epochs
 
-- Time is divided into **epochs** (configured as 8 hours on PulseChain testnet).
+- Time is divided into **epochs** (configured as 8 hours on PulseChain mainnet).
 - At the end of each epoch, `staking.rebase()` is called (triggered by the first stake/unstake/redeem after the epoch ends).
 - `rebase()` calls `distributor.distribute()` which **mints new PULSAR** to the staking contract.
 - The staking contract then updates `epoch.distribute` = surplus PULSAR available for the next rebase.
@@ -61,7 +61,7 @@ APY = (1 + stakingRebase)^(365 × 3) - 1
 **Route:** `/`  
 **Redux slice:** `app-slice.ts`
 
-The dashboard reads on-chain data for PulseChain testnet and displays:
+The dashboard reads on-chain data for PulseChain mainnet and displays:
 
 | Field | Source | Formula |
 |-------|--------|---------|
@@ -69,12 +69,12 @@ The dashboard reads on-chain data for PulseChain testnet and displays:
 | **Market Cap** | `quasarContract.totalSupply()` × PULSAR price | `supply × $1` |
 | **TVL** | `quasarContract.circulatingSupply()` × PULSAR price | `stakedQuasar × $1` |
 | **Treasury Balance** | `treasuryContract.totalReserves()` | Formatted as 9-dec PULSAR units |
-| **Backing per QUASAR** | On testnet: `0` (no RFV API) | mainnet uses external fund API |
+| **Backing per QUASAR** | Treasury balances × live oracle prices | treasury value / circulating supply |
 
 **Data flow:**
 1. `useWeb3Context` detects network and provider
 2. `loadAppDetails({ networkID, provider })` thunk is dispatched
-3. For `PULSE_TESTNET`: reads directly from staking, QUASAR, treasury, and distributor contracts
+3. For `PULSE` (chain 369): reads staking, QUASAR, treasury, distributor, LP, and AaveOracleFetch data
 4. State stored in Redux `app` slice, consumed by `TreasuryDashboard` component
 
 ---
@@ -141,28 +141,31 @@ Displays all active bonds. For each bond:
 | **ROI** | `(marketPrice − bondPrice) / bondPrice × 100` |
 | **Purchased** | Treasury balance of this reserve token |
 
-**Currently active bonds on PulseChain testnet:**
+**Active bonds on PulseChain mainnet:**
 
 | Bond | Type | Contract |
 |------|------|----------|
-| USDC | StableBond (`BondDepository`) | `USDCBondDepository` |
-| WPLS | CustomBond (`EthBondDepository`) | `EthBondDepository` |
+| USDC | Reserve bond (`BondDepository`) | `USDCBondDepository` |
+| WPLS | Reserve bond (`BondDepository`) | `WPLSBondDepository` |
+| pDAI | Reserve bond (`BondDepository`) | `PDAIBondDepository` |
 
 ### Bond Price Calculation
 
-**USDC bond** (`BondDepository`):
+All three reserve bonds use the same USD/PULSAR price scale:
 ```
 bondPriceInUSD() = bondPrice() × 10^reserveDecimals / 100
-                 = minimumPrice × 1e6 / 100
-minimumPrice = 100 → $1/PULSAR
+minimumPrice = discounted PULSAR USD price in cents
 ```
 
-**WPLS bond** (`EthBondDepository`):
+Before calculating payout, Treasury converts the deposited principal to USD:
 ```
-bondPriceInUSD() = bondPrice() × assetPrice(oracle) × 1e6
-UI formula: raw / 1e16 = USD/PULSAR
-minimumPrice = 100 × 1e8 / oraclePrice (calculated dynamically)
+valueOf(principal, amount)
+  = amount × AaveOracleFetch.getAssetPrice(realPriceAsset)
+  = 9-decimal USD reserve value
 ```
+
+This applies equally to real tokens and mocks; mock tokens map to the real
+USDC, WPLS, or pDAI address for oracle lookup.
 
 ### Bond Detail Modal
 
@@ -174,7 +177,7 @@ Opened by clicking **Mint** on a bond row.
 |-------|-------------|
 | Mint Price | Bond price in USD per PULSAR |
 | QUASAR Price | Current QUASAR market price |
-| PULSAR Price | Current PULSAR market price ($1 on testnet) |
+| PULSAR Price | Current PULSAR/pDAI LP market price |
 
 #### Mint tab
 
@@ -207,7 +210,7 @@ Shows your **current vesting position** for that bond:
 - **Claim and Autostake** button: `bondContract.redeem(address, autostake=true)`
   - Claims + immediately stakes PULSAR → you receive QUASAR
 
-**Important:** The original deposited asset (USDC/WPLS) **cannot be retrieved**. It is permanently held by the treasury. You receive PULSAR in return.
+**Important:** The deposited USDC, WPLS, or pDAI is transferred to Treasury. You receive vested PULSAR in return.
 
 ### Bond Vesting
 
@@ -288,7 +291,7 @@ Exchange rate displayed: `1 QUASAR = N QUASAR` (increases over time as index gro
 src/
 ├── constants/
 │   ├── addresses.ts          ← Contract addresses per network
-│   ├── blockchain.ts         ← Network IDs (PULSE=369, PULSE_TESTNET=943)
+│   ├── blockchain.ts         ← PulseChain mainnet network ID (PULSE=369)
 │   └── view.ts               ← Feature flags per network (mints, farm, etc.)
 │
 ├── helpers/bond/
@@ -316,10 +319,9 @@ src/
 
 `useWeb3Context` hook detects the connected wallet network. All Redux thunks receive `networkID` and `provider` to select the correct contract addresses from `constants/addresses.ts`.
 
-Feature availability per network is controlled in `constants/view.ts`:
+Feature availability is controlled in `constants/view.ts` for PulseChain mainnet:
 ```typescript
-// view.ts example for PULSE_TESTNET
-[Networks.PULSE_TESTNET]: {
+[Networks.PULSE]: {
     mints: true,    // bonding enabled
     stake: true,
     farm: false,    // no farm contract
@@ -329,37 +331,30 @@ Feature availability per network is controlled in `constants/view.ts`:
 
 ---
 
-## 9. PulseChain Testnet vs Mainnet
+## 9. PulseChain Mainnet Deployment
 
-| Feature | Mainnet | PulseChain Testnet |
-|---------|---------|-------------------|
-| PULSAR price | From DEX LP (PulseX) | Hardcoded `$1` |
-| APY source | `epoch.distribute / circ` | `distributor.nextRewardFor / totalSupply` |
-| Treasury data | Zapper API + on-chain | `treasury.totalReserves()` on-chain only |
-| Bonds | Legacy MIM, AVAX, LP | USDC + WPLS |
-| Oracles | Live DEX prices | Mock fixed-price oracles |
-| Farm | Enabled | Disabled |
-| QUASAR backing | RFV from fund API | `0` |
+The application supports PulseChain mainnet (chain 369) only. A deployment can
+use the real USDC, WPLS, and pDAI contracts or deploy mock principal tokens when
+`USE_MOCK_TOKENS=true`. In both modes, USD prices come from the live
+`AaveOracleFetch` contract; mock principal tokens are mapped to the corresponding
+real asset address for price discovery.
+
+The deployment and LP scripts write fresh addresses to
+`wonderland-contract/deployments/pulse.json`. Run `npm run sync-frontend:mainnet`
+from the contract repository to copy those addresses into the frontend's
+`.env.local` file.
 
 ---
 
-## 10. Contract Addresses (PulseChain Testnet)
+## 10. Mainnet Price Sources
 
-| Contract | Address |
-|----------|---------|
-| PULSAR | `0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1` |
-| QUASAR | `0x86D77b0A5bf68ADbb5Eb1A9a99695FA5d61EFc41` |
-| QUASAR | `0x5B88d6Ca0e66b6E0B7e0c0a9aE5dF344d10e4a66` |
-| MockUSDC | `0x9131d71A23e0cdd8F0086ea525D1076B72a749eD` |
-| WPLS | `0x70499adEBB11Efd915E3b69E700c331778628707` |
-| Treasury | `0xB2Aa7B8f75E6faD5d3a855fC49a6E7Acf07EeCD` |
-| Staking | `0x8F0A50b0a43E9fFC0Bd1F0FD39dE26AF8D2FbC33` |
-| StakingHelper | `0x4BAEA2dE7ACb649e20F5Bd53F9d3c3AEBcA62B6e` |
-| Distributor | `0xD629612fed09BC583Ac22a0f57De49A89b953A59` |
-| BondingCalculator | `0xB8E56B78ED6AC27A28DF7b32Ab2bDE8E2d0e6C6c` |
-| USDCBondDepository | `0xC3da889bE5899F5f7c1f85147AA09a8bC6505fF1` |
-| EthBondDepository (WPLS) | `0x422198AD5C252a4fe38d430f4cBD29687Ea51A3c` |
-| PLSOracle | Deployed via `FixedPLSPriceOracle` |
+| Item | Value |
+|------|-------|
+| AaveOracleFetch | `0x0f907F1D586302AD04283f5739bA20f28fD7cBC6` |
+| WPLS price asset | `0xA1077a294dDE1B09bB078844df40758a5D0f9a27` |
+| USDC price asset | `0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07` |
+| pDAI price asset | `0x6B175474E89094C44Da98b954EedeAC495271d0F` |
+| Oracle unit | 8 decimals (`BASE_CURRENCY_UNIT = 1e8`) |
 
 ---
 
@@ -369,8 +364,8 @@ Feature availability per network is controlled in `constants/view.ts`:
 |---------|-------|-----|
 | APY shows 0% | `epoch.distribute` stale (pre-epoch) | Use `distributor.nextRewardFor` for display |
 | APY shows astronomical number | Very few tokens staked (per-staker rate explodes) | Divide by `totalSupply` not `circulatingSupply` |
-| Bond price wrong | Stale `minimumPrice` on contract | Run `scripts/setMinPrice.js` |
+| Bond price wrong | Live oracle asset mapping or LP reserves are wrong | Check synced price-asset addresses and LP reserves |
 | "Bond too small" error | Payout < 0.01 PULSAR minimum | Enter larger amount (need ≥ 0.01 PULSAR payout) |
 | "Approve" button stuck | Allowance not picked up after tx | Hard refresh; account-slice re-reads allowance |
-| QUASAR price = $10 | Old hardcoded PULSAR price | Set `pulsarPrice = 1` in `app-slice.ts` |
+| QUASAR price = 0 | Missing/empty frontend deployment addresses or unavailable oracle/LP | Run the frontend sync script and check the PulseChain RPC |
 | LP ROI negative | LP pool has wrong ratio (10:1 vs 1:1) | Run `scripts/fixLP.js` or adjust `minimumPrice` |

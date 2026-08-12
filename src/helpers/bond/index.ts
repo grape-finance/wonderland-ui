@@ -10,9 +10,8 @@ import EthIcon from "../../assets/tokens/WETH.e.png";
 import wMemoMimIcon from "../../assets/tokens/QUASAR-MIM.png";
 // Testnet bond icons
 import UsdcIcon from "../../assets/tokens/USDC.png";
+import PdaiIcon from "../../assets/tokens/DAI.e.png";
 import WplsIcon from "../../assets/tokens/pulse.png";
-import TimeUsdcLpIcon from "../../assets/tokens/PULSAR-MIM.svg";
-import TimeWplsLpIcon from "../../assets/tokens/PULSAR-AVAX.svg";
 
 import { StableBondContract, LpBondContract, WavaxBondContract, StableReserveContract, LpReserveContract, WethBondContract, ProBondContract } from "../../abi";
 import { getWmemoMarketPrice } from "../get-wmemo-price";
@@ -35,9 +34,7 @@ export const mim = new StableBond({
     deprecated: true,
     isAvailable: {
         [Networks.PULSE]: true,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
+
     },
 });
 
@@ -53,21 +50,19 @@ export const mimPro = new StableV2Bond({
             bondAddress: "0x629a650E173B730E0F7C1206BF9f74808F475d1b",
             reserveAddress: "0x82f0b8b456c1a451378467398982d4834b6829c1",
         },
-        [Networks.PULSE]: {
-            bondAddress: "0x50f40350cbB170B6e5D2cC0859ac84ca17044d0a",
-            reserveAddress: "0xfea7a6a0b346362bf88a9e4a88416b77a57d6c2a",
-        },
-        [Networks.PULSE]: {
-            bondAddress: "0x17451Eb19D34e6c8404C3188F2fcc46c493146C9",
-            reserveAddress: "0x99D8a9C45b2ecA8864373A26D1459e3Dff1e17F3",
-        },
+        // [Networks.PULSE]: {
+        //     bondAddress: "0x50f40350cbB170B6e5D2cC0859ac84ca17044d0a",
+        //     reserveAddress: "0xfea7a6a0b346362bf88a9e4a88416b77a57d6c2a",
+        // },
+        // [Networks.PULSE]: {
+        //     bondAddress: "0x17451Eb19D34e6c8404C3188F2fcc46c493146C9",
+        //     reserveAddress: "0x99D8a9C45b2ecA8864373A26D1459e3Dff1e17F3",
+        // },
     },
     v2Bond: true,
     isAvailable: {
         [Networks.PULSE]: false,
-        [Networks.PULSE]: true,
-        [Networks.PULSE]: true,
-        [Networks.PULSE]: true,
+   
     },
     disableZap: true,
     deprecated: true,
@@ -91,9 +86,7 @@ export const wavax = new CustomBond({
     v2Bond: false,
     isAvailable: {
         [Networks.PULSE]: true,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
+
     },
 });
 
@@ -114,9 +107,7 @@ export const weth = new CustomBond({
     v2Bond: false,
     isAvailable: {
         [Networks.PULSE]: true,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
+
     },
     disableZap: true,
     deprecated: true,
@@ -142,9 +133,7 @@ export const mimTime = new LPBond({
     v2Bond: false,
     isAvailable: {
         [Networks.PULSE]: true,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
+
     },
 });
 
@@ -168,9 +157,7 @@ export const avaxTime = new CustomLPBond({
     v2Bond: false,
     isAvailable: {
         [Networks.PULSE]: true,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
+
     },
 });
 
@@ -193,15 +180,19 @@ export const wmemoMim = new NotTimeLpBond({
     v2Bond: false,
     isAvailable: {
         [Networks.PULSE]: true,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
-        [Networks.PULSE]: false,
+
     },
     deprecated: true,
     tokensInStrategy: "40248760911630751941101",
 });
 
-// ─── PulseChain Testnet bonds ────────────────────────────────────────────────
+// ─── PulseChain Mainnet bonds ────────────────────────────────────────────────
+
+const usdcMainnetBondAddress = import.meta.env.VITE_USDC_BOND_ADDRESS || "";
+const wplsMainnetBondAddress = import.meta.env.VITE_WPLS_BOND_ADDRESS || "";
+const usdcMainnetTokenAddress = import.meta.env.VITE_USDC_ADDRESS || "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07";
+const wplsMainnetTokenAddress = import.meta.env.VITE_WPLS_ADDRESS || "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
+const pdaiMainnetTokenAddress = import.meta.env.VITE_PDAI_ADDRESS || "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 
 export const usdcBond = new StableBond({
     name: "usdc",
@@ -213,15 +204,15 @@ export const usdcBond = new StableBond({
     reserveDecimals: 6,
     disableZap: true,
     networkAddrs: {
-        [Networks.PULSE_TESTNET]: {
-            bondAddress: "0xC3da889bE5899F5f7c1f85147AA09a8bC6505fF1",
-            reserveAddress: "0x9131d71A23e0cdd8F0086ea525D1076B72a749eD",
+        [Networks.PULSE]: {
+            bondAddress: usdcMainnetBondAddress,
+            reserveAddress: usdcMainnetTokenAddress,
         },
     },
     v2Bond: false,
     deprecated: false,
     isAvailable: {
-        [Networks.PULSE_TESTNET]: true,
+        [Networks.PULSE]: Boolean(usdcMainnetBondAddress),
     },
 });
 
@@ -230,70 +221,48 @@ export const wplsBond = new CustomBond({
     displayName: "WPLS",
     bondToken: "WPLS",
     bondIconSvg: WplsIcon,
-    bondContractABI: WavaxBondContract,
+    bondContractABI: StableBondContract,
     reserveContractAbi: StableReserveContract,
     disableZap: true,
-    // EthBondDepository: bondPriceInUSD = bondPrice() × assetPrice(oracle) × 1e6
-    // Display formula: bondPriceRaw / 1e16  (NOT formatUnits(raw, 18))
-    isEthBond: true,
+    // Treasury converts WPLS principal to USD through AaveOracleFetch.
     networkAddrs: {
-        [Networks.PULSE_TESTNET]: {
-            bondAddress: "0x422198AD5C252a4fe38d430f4cBD29687Ea51A3c",
-            reserveAddress: "0x70499adEBB11Efd915E3b69E700c331778628707",
+        [Networks.PULSE]: {
+            bondAddress: wplsMainnetBondAddress,
+            reserveAddress: wplsMainnetTokenAddress,
         },
     },
     v2Bond: false,
     deprecated: false,
     isAvailable: {
-        [Networks.PULSE_TESTNET]: true,
+        [Networks.PULSE]: Boolean(wplsMainnetBondAddress),
     },
 });
 
-export const timeUsdcLpBond = new LPBond({
-    name: "time_usdc_lp",
-    displayName: "PULSAR-USDC LP",
-    bondToken: "USDC",
-    bondIconSvg: TimeUsdcLpIcon,
-    bondContractABI: LpBondContract,
-    reserveContractAbi: LpReserveContract,
+// pDAI is volatile; Treasury converts each deposit through AaveOracleFetch.
+const pdaiMainnetBondAddress = import.meta.env.VITE_PDAI_BOND_ADDRESS || "";
+
+export const pdaiBond = new CustomBond({
+    name: "pdai",
+    displayName: "pDAI",
+    bondToken: "PDAI",
+    bondIconSvg: PdaiIcon,
+    bondContractABI: StableBondContract,
+    reserveContractAbi: StableReserveContract,
+    reserveDecimals: 18,
     disableZap: true,
     networkAddrs: {
-        [Networks.PULSE_TESTNET]: {
-            bondAddress: "0x2766EA82510CC3c306D5c8545182642e08CAe7f2",
-            reserveAddress: "0x67E352F4941Ce14643Ab8382eF41aB5173f1258f",
+        [Networks.PULSE]: {
+            bondAddress: pdaiMainnetBondAddress,
+            reserveAddress: pdaiMainnetTokenAddress,
         },
     },
-    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1",
     v2Bond: false,
-    deprecated: true,
+    deprecated: false,
     isAvailable: {
-        [Networks.PULSE_TESTNET]: false,
+        [Networks.PULSE]: Boolean(pdaiMainnetBondAddress),
     },
 });
 
-export const timeWplsLpBond = new CustomLPBond({
-    name: "time_wpls_lp",
-    displayName: "PULSAR-WPLS LP",
-    bondToken: "WPLS",
-    bondIconSvg: TimeWplsLpIcon,
-    bondContractABI: LpBondContract,
-    reserveContractAbi: LpReserveContract,
-    disableZap: true,
-    networkAddrs: {
-        [Networks.PULSE_TESTNET]: {
-            bondAddress: "0x997c367125Ca92CcdB15AA62DACfB599e24c38A8",
-            reserveAddress: "0x1702baa9aaD25664D96756a568FE8550c34C6B7b",
-        },
-    },
-    lpUrl: "https://pulsex.mypinata.cloud/ipfs/bafybeidea3ibq4lu5t6vk6ihp4iuznjb3wtm3oq4xjnbhngonjh7bvbe2m/#/?outputCurrency=0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1",
-    v2Bond: false,
-    // StandardBondingCalculator.markdown() was designed for stablecoins (MIM/USDC).
-    // For WPLS (18 dec, $0.000009/token) the formula returns astronomical values.
-    // Disabling until a custom oracle-aware BondingCalculator is deployed.
-    deprecated: true,
-    isAvailable: {
-        [Networks.PULSE_TESTNET]: false,
-    },
-});
-
-export default [mim, wavax, weth, avaxTime, mimTime, wmemoMim, mimPro, usdcBond, wplsBond, timeUsdcLpBond, timeWplsLpBond];
+// export default [mim, wavax, weth, avaxTime, mimTime, wmemoMim, mimPro, usdcBond, wplsBond, timeUsdcLpBond, timeWplsLpBond];
+// LP tokens provide liquidity only; they are not accepted as launch bonds.
+export default [usdcBond, wplsBond, pdaiBond];

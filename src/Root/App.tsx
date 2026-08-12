@@ -70,10 +70,10 @@ function App() {
                     }
                 }
             });
-            if (chainID === Networks.PULSE || chainID === Networks.PULSE_TESTNET) {
+            if (chainID === Networks.PULSE) {
                 dispatch(calcWrapPrice({ networkID: chainID, provider: loadProvider }));
             }
-            // Farm rewards only on mainnet (Farm contract not deployed on testnet)
+            // Farm rewards remain disabled until a PulseChain farm is configured.
             if (chainID === Networks.PULSE) {
                 dispatch(calculateUserRewardDetails({ networkID: chainID, address, provider: loadProvider }));
             }

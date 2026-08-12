@@ -1,5 +1,5 @@
 import { ethers, constants } from "ethers";
-import { getMarketPrice, getTokenPrice, sleep, trim } from "../../helpers";
+import { getMarketPrice, getProtocolAssetPrices, getTokenPrice, sleep, trim } from "../../helpers";
 import { calculateUserBondDetails, getBalances } from "./account-slice";
 import { getAddresses } from "../../constants";
 import { fetchPendingTxns, clearPendingTxn } from "./pending-txns-slice";
@@ -10,13 +10,13 @@ import { Bond } from "../../helpers/bond/bond";
 import { Networks } from "../../constants/blockchain";
 import { getBondCalculator } from "../../helpers/bond-calculator";
 import { RootState } from "../store";
-import { avaxTime, wmemoMim } from "../../helpers/bond";
 import { error, warning, success, info } from "../slices/messages-slice";
 import { messages } from "../../constants/messages";
 import { getGasPrice } from "../../helpers/get-gas-price";
 import { metamaskErrorWrap } from "../../helpers/metamask-error-wrap";
 import { BigNumber } from "ethers";
-import { CustomTreasuryContract, wMemoTokenContract, StakingContract } from "../../abi";
+import { CustomTreasuryContract, TreasuryContract, wMemoTokenContract } from "../../abi";
+import bond, { usdcBond } from "src/helpers/bond";
 
 interface IChangeApproval {
     bond: Bond;
@@ -24,6 +24,56 @@ interface IChangeApproval {
     networkID: Networks;
     address: string;
 }
+
+interface IMintMockBondAsset {
+    bond: Bond;
+    provider: StaticJsonRpcProvider | JsonRpcProvider;
+    networkID: Networks;
+    address: string;
+    value: string;
+}
+
+/**
+ * Refill a wallet for rehearsals against a mock-token deployment.
+ * The UI only exposes this action when VITE_USE_MOCK_TOKENS=true; production
+ * reserve tokens do not implement this permissionless mint function.
+ */
+export const mintMockBondAsset = createAsyncThunk(
+    "bonding/mintMockBondAsset",
+    async ({ bond, provider, networkID, address, value }: IMintMockBondAsset, { dispatch }) => {
+        if (!provider || !address || import.meta.env.VITE_USE_MOCK_TOKENS !== "true") {
+            dispatch(warning({ text: messages.please_connect_wallet }));
+            return;
+        }
+
+        const signer = provider.getSigner();
+        const reserveContract = new ethers.Contract(
+            bond.getAddressForReserve(networkID),
+            ["function mint(address,uint256)"],
+            signer,
+        );
+
+        let mintTx;
+        try {
+            const gasPrice = await getGasPrice(provider);
+            mintTx = await reserveContract.mint(address, ethers.utils.parseUnits(value, bond.reserveDecimals), { gasPrice });
+            dispatch(
+                fetchPendingTxns({
+                    txnHash: mintTx.hash,
+                    text: `Getting test ${bond.displayName}`,
+                    type: `faucet_${bond.name}`,
+                }),
+            );
+            await mintTx.wait();
+            await dispatch(calculateUserBondDetails({ address, bond, networkID, provider }));
+            dispatch(success({ text: `Test ${bond.displayName} added to your wallet` }));
+        } catch (err: any) {
+            metamaskErrorWrap(err, dispatch);
+        } finally {
+            if (mintTx) dispatch(clearPendingTxn(mintTx.hash));
+        }
+    },
+);
 
 export const changeApproval = createAsyncThunk("bonding/changeApproval", async ({ bond, provider, networkID, address }: IChangeApproval, { dispatch }) => {
     if (!provider) {
@@ -95,12 +145,12 @@ export interface IBondDetails {
     soldOut?: boolean;
 }
 
-export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async ({ bond, value, provider, networkID }: ICalcBondDetails, { dispatch, getState }) => {
+export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async ({ bond, value, provider, networkID }: ICalcBondDetails, { dispatch }) => {
     if (!value) {
         value = "0";
     }
 
-    const amountInWei = ethers.utils.parseEther(value);
+    const amountInWei = ethers.utils.parseUnits(value, bond.reserveDecimals);
 
     let bondPrice = 0,
         bondDiscount = 0,
@@ -109,99 +159,41 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
         bondQuoteWrapped = 0;
 
     const addresses = getAddresses(networkID);
-    const mimPrice = getTokenPrice("MIM");
 
     const bondContract = bond.getContractForBond(networkID, provider);
     const bondCalcContract = getBondCalculator(networkID, provider);
+    const treasuryContract = new ethers.Contract(addresses.TREASURY_ADDRESS, TreasuryContract, provider);
     const wMemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
 
     const terms = await bondContract.terms();
-    const maxBondPriceRaw = await bondContract.maxPayout();
-    // PULSAR uses 9 decimals — use formatUnits to safely convert BigNumber
-    let maxBondPrice = Number(ethers.utils.formatUnits(maxBondPriceRaw, "gwei"));
-    const maxBondPriceWrapped = (await wMemoContract.MEMOTowMEMO(maxBondPriceRaw)) / Math.pow(10, 18);
+    const maxPayoutRaw = await bondContract.maxPayout();
+    const maxBondPriceWrapped = Number(ethers.utils.formatEther(await wMemoContract.MEMOTowMEMO(maxPayoutRaw)));
+    let maxBondPrice = Number(ethers.utils.formatUnits(maxPayoutRaw, 9));
 
-    // --- Market price resolution ---
-    // On testnet: no Coingecko data exists for PULSAR, so read from app Redux state
-    // (populated by loadAppDetails which queries the staking contract index).
-    // Fall back to on-chain staking index if app state hasn't loaded yet.
-    // On mainnet: use the existing API helper.
-    let marketPrice: number; // PULSAR price in USD
-    let wMemoPrice: number;  // QUASAR price in USD
+    const { timePrice } = await getMarketPrice(networkID, provider);
+    const protocolAssetPrices = await getProtocolAssetPrices(networkID, provider);
 
-    if (networkID === Networks.PULSE_TESTNET) {
-        const appState = (getState() as RootState).app as any;
-        marketPrice = Number(appState.marketPrice) || 0;
-        wMemoPrice = Number(appState.wMemoMarketPrice) || 0;
+    const marketPrice = timePrice;
 
-        // Fallback: derive directly from staking contract if app state not loaded yet
-        if (!marketPrice || !wMemoPrice) {
-            const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
-            const currentIndex = await stakingContract.index();
-            const indexNum = Number(ethers.utils.formatUnits(currentIndex, "gwei"));
-            // PULSAR launch price on testnet is $1; QUASAR = index * PULSAR price
-            marketPrice = marketPrice || 1;
-            wMemoPrice = wMemoPrice || (indexNum * (marketPrice || 1));
-        }
-    } else {
-        const prices = await getMarketPrice();
-        marketPrice = prices.timePrice * mimPrice;
-        wMemoPrice = prices.wMemoPrice;
-    }
-
-    // --- Bond price from contract ---
-    //
-    // BondDepository (non-LP, e.g. USDC):
-    //   bondPriceInUSD() = bondPrice() × 10^reserveDecimals / 100
-    //   e.g. minimumPrice=100, USDC 6 dec: 100 × 1e6 / 100 = 1e6 → formatUnits(1e6, 6) = $1
-    //   Display: formatUnits(raw, reserveDecimals)
-    //
-    // EthBondDepository (non-LP, e.g. WPLS):
-    //   bondPriceInUSD() = bondPrice() × assetPrice(oracle, 8 dec) × 1e6
-    //   USD per PULSAR = (bondPrice/100) × (assetPrice/1e8) = raw / 1e16
-    //   Display: raw / 1e16
-    //
-    // BondDepository (LP, e.g. PULSAR-USDC LP):
-    //   bondPriceInUSD() = bondPrice() × markdown(LP) / 100
-    //   markdown = non-PULSAR reserve × 2 × 1e9 / getTotalValue
-    //   For stablecoin LP (USDC 6 dec, $1 price): result / 1e7 = USD price ✓
-    //   For WPLS LP: markdown is astronomically large (formula assumes stablecoin).
-    //                PULSAR-WPLS LP is disabled (deprecated: true) until a custom
-    //                oracle-aware BondingCalculator is available.
     try {
-        const bondPriceRaw = await bondContract.bondPriceInUSD();
-        if (bond.isLP) {
-            // LP price formula: bondPriceInUSD = bondPrice() × markdown / 100
-            // markdown = quoteReserve × 2 × 1e9 / getTotalValue
-            // For stablecoin quote (USDC 6 dec): markdown ≈ 1e6 at 1:1 → raw ≈ 1e7 → / 1e7 = $1
-            // For 18-dec stablecoin (MIM): markdown ≈ 1e18 at 1:1 → raw ≈ 1e19 → / 1e19 = $1
-            // The divisor is 10^(quoteTokenDecimals + 1), hardcoded to 1e7 for USDC LP.
-            bondPrice = Number(bondPriceRaw) / Math.pow(10, 7);
-        } else if (bond.isEthBond) {
-            // EthBondDepository: USD = raw / 1e16
-            bondPrice = Number(bondPriceRaw) / 1e16;
-        } else {
-            // BondDepository: USD = formatUnits(raw, reserveDecimals)
-            bondPrice = Number(ethers.utils.formatUnits(bondPriceRaw, bond.reserveDecimals));
-        }
+        
+        const bondPriceRaw = BigNumber.from(await bondContract.bondPriceInUSD());
 
-        if (bond.name === avaxTime.name) {
-            bondPrice = bondPrice * getTokenPrice("AVAX");
-        }
-
+        // Every reserve bond is USD-denominated by Treasury's live oracle valuation.
+        bondPrice = Number(ethers.utils.formatUnits(bondPriceRaw, bond.reserveDecimals));
         bondDiscount = bondPrice > 0 ? (marketPrice - bondPrice) / bondPrice : 0;
     } catch (e) {
         console.log("error getting bondPriceInUSD", e);
     }
 
     let maxBondPriceToken = 0;
-    const maxBodValue = ethers.utils.parseEther("1");
+    const maxBodValue = ethers.utils.parseUnits("1", bond.reserveDecimals);
 
     if (bond.isLP) {
         if (!bond.deprecated) {
             valuation = await bondCalcContract.valuation(bond.getAddressForReserve(networkID), amountInWei);
             bondQuote = await bondContract.payoutFor(valuation);
-            bondQuoteWrapped = (await wMemoContract.MEMOTowMEMO(bondQuote)) / Math.pow(10, 18);
+            bondQuoteWrapped = (await wMemoContract.MEMOTowMEMO(bondQuote)) / Math.pow(10, bond.reserveDecimals);
             bondQuote = bondQuote / Math.pow(10, 9);
 
             const maxValuation = await bondCalcContract.valuation(bond.getAddressForReserve(networkID), maxBodValue);
@@ -210,33 +202,19 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
         }
     } else {
         if (!bond.deprecated) {
-            // For non-LP bonds, payoutFor() expects treasury-normalized units.
-            // treasury.valueOf(anyToken, 1 whole token) always returns 1e9 PULSAR-gwei,
-            // because the treasury normalises by (tokenDecimals → PULSAR decimals = 9).
-            // So for N user tokens the correct input is N * 1e9 = parseUnits(value, 9).
-            const amountForPayout = ethers.utils.parseUnits(value, 9); // value × 1e9
-            try {
-                bondQuote = await bondContract.payoutFor(amountForPayout);
-                if (bondQuote > 0) {
-                    bondQuoteWrapped = (await wMemoContract.MEMOTowMEMO(parseInt(trim(bondQuote / Math.pow(10, 9), 0)))) / Math.pow(10, 18);
-                }
-                bondQuote = bondQuote / Math.pow(10, 9);
-            } catch (e) {
-                console.log("payoutFor quote error (non-LP)", e);
-                bondQuote = 0;
-            }
+            // `valueOf` collides with Object.prototype in ethers v5. Calling the
+            // contract method through its full signature is required; the plain
+            // `treasuryContract.valueOf(...)` returns the Contract object and
+            // makes every reserve-bond details request fail downstream.
+            valuation = await treasuryContract["valueOf(address,uint256)"](bond.getAddressForReserve(networkID), amountInWei);
+            bondQuote = await bondContract.payoutFor(valuation);
+            bondQuoteWrapped = Number(ethers.utils.formatEther(await wMemoContract.MEMOTowMEMO(bondQuote)));
+            bondQuote = Number(ethers.utils.formatUnits(bondQuote, 9));
 
-            // Reference: 1 whole token = 1e9 treasury units
-            const oneTokenNorm = ethers.BigNumber.from(10).pow(9);
-            try {
-                const maxBondQuote = await bondContract.payoutFor(oneTokenNorm);
-                // maxBondQuote is PULSAR-gwei payout for 1 whole token
-                // maxBondPriceToken = how many whole tokens to reach maxBondPrice PULSAR
-                maxBondPriceToken = maxBondPrice / Number(ethers.utils.formatUnits(maxBondQuote, 9));
-            } catch (e) {
-                console.log("payoutFor maxBondQuote error (non-LP)", e);
-                maxBondPriceToken = bondPrice > 0 ? maxBondPrice * bondPrice : 0;
-            }
+            const maxValuation = await treasuryContract["valueOf(address,uint256)"](bond.getAddressForReserve(networkID), maxBodValue);
+            const maxBondQuote = await bondContract.payoutFor(maxValuation);
+            const maxBondQuoteFormatted = Number(ethers.utils.formatUnits(maxBondQuote, 9));
+            maxBondPriceToken = maxBondQuoteFormatted > 0 ? maxBondPrice / maxBondQuoteFormatted : 0;
         }
     }
 
@@ -244,9 +222,7 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
         dispatch(error({ text: messages.try_mint_more(maxBondPrice.toFixed(2).toString()) }));
     }
 
-    
-
-    // Treasury balance of the reserve token (how much has been bonded/purchased)
+    // Calculate bonds purchased
     const token = bond.getContractForReserve(networkID, provider);
     let purchased = await token.balanceOf(addresses.TREASURY_ADDRESS);
 
@@ -254,31 +230,25 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
         purchased = BigNumber.from(purchased).add(BigNumber.from(bond.tokensInStrategy)).toString();
     }
 
-    
-
     if (bond.isLP) {
         const assetAddress = bond.getAddressForReserve(networkID);
         const markdown = await bondCalcContract.markdown(assetAddress);
         purchased = await bondCalcContract.valuation(assetAddress, purchased);
-        purchased = (markdown / Math.pow(10, 18)) * (purchased / Math.pow(10, 9));
+        purchased = (markdown / Math.pow(10, bond.reserveDecimals)) * (purchased / Math.pow(10, 9));
 
         if (bond.customToken) {
-            purchased = purchased * getTokenPrice(bond.bondToken);
+            const tokenPrice = protocolAssetPrices[bond.bondToken] || getTokenPrice(bond.bondToken);
+            purchased = purchased * tokenPrice;
         }
 
-        if (bond.name === wmemoMim.name) {
-            purchased = purchased * wMemoPrice * mimPrice;
-        }
     } else {
-        // Use actual reserve decimals — USDC=6, MIM/WPLS=18
-        purchased = Number(ethers.utils.formatUnits(purchased, bond.reserveDecimals));
+        purchased = purchased / Math.pow(10, bond.reserveDecimals);
 
         if (bond.customToken) {
-            purchased = purchased * getTokenPrice(bond.bondToken);
+            const tokenPrice = protocolAssetPrices[bond.bondToken] || getTokenPrice(bond.bondToken);
+            purchased = purchased * tokenPrice;
         }
     }
-
-    
 
     return {
         bond: bond.name,
@@ -287,8 +257,8 @@ export const calcBondDetails = createAsyncThunk("bonding/calcBondDetails", async
         purchased,
         vestingTerm: Number(terms.vestingTerm),
         maxBondPrice,
-        bondPrice,           // USD price per PULSAR (already formatted)
-        marketPrice: wMemoPrice, // QUASAR price shown in Bond header
+        bondPrice,
+        marketPrice,
         maxBondPriceToken,
         bondQuoteWrapped,
         maxBondPriceWrapped,
@@ -319,16 +289,16 @@ export const calcBondV2Details = createAsyncThunk("bonding/calcBondV2Details", a
     const customTreasury = new ethers.Contract(addresses.TREASURY_ADDRESS, CustomTreasuryContract, provider);
 
     const terms = await bondContract.terms();
-    let maxBondPrice = (await bondContract.maxPayout()) / Math.pow(10, 18);
+    let maxBondPrice = (await bondContract.maxPayout()) / Math.pow(10, bond.reserveDecimals);
 
     const wmemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
-    const treasutyBalance = (await wmemoContract.balanceOf(addresses.TREASURY_ADDRESS)) / Math.pow(10, 18);
+    const treasutyBalance = (await wmemoContract.balanceOf(addresses.TREASURY_ADDRESS)) / Math.pow(10, bond.reserveDecimals);
 
     maxBondPrice = treasutyBalance > maxBondPrice ? maxBondPrice : treasutyBalance;
 
-    let { wMemoPrice } = await getMarketPrice();
+    let { wMemoPrice } = await getMarketPrice(networkID, provider);
 
-    const mimPrice = getTokenPrice("MIM");
+    const USDCPrice = getTokenPrice("USDC");
 
     const maxBodValue = ethers.utils.parseEther("1");
     const bondValue = ethers.utils.parseEther("1000");
@@ -350,7 +320,7 @@ export const calcBondV2Details = createAsyncThunk("bonding/calcBondV2Details", a
     }
 
     let purchased = await bondContract.totalPrincipalBonded();
-    purchased = Number(ethers.utils.formatEther(purchased)) * mimPrice;
+    purchased = Number(ethers.utils.formatEther(purchased)) * USDCPrice;
 
     const soldOut = treasutyBalance < 0.00001;
 
@@ -380,7 +350,6 @@ interface IBondAsset {
 export const bondAsset = createAsyncThunk("bonding/bondAsset", async ({ value, address, bond, networkID, provider, slippage, useAvax }: IBondAsset, { dispatch }) => {
     const depositorAddress = address;
     const acceptedSlippage = slippage / 100 || 0.005;
-    // Use the reserve token's actual decimals so USDC (6) deposits the right amount
     const valueInWei = ethers.utils.parseUnits(value, bond.reserveDecimals);
     const signer = provider.getSigner();
     const bondContract = bond.getContractForBond(networkID, signer);

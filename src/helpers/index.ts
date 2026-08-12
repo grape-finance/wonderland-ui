@@ -9,3 +9,4 @@ export * from "./token-price";
 export * from "./price-units";
 export * from "./sleep";
 export * from "./get-wmemo-price";
+export * from "./aave-oracle-price";

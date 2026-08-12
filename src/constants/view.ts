@@ -20,13 +20,4 @@ export const VIEWS_FOR_NETWORK: { [key: number]: IViewsForNetwork } = {
         fund: false,
         redemption: false,
     },
-    [Networks.PULSE_TESTNET]: {
-        dashboard: true,
-        stake: true,
-        mints: true,
-        calculator: true,
-        farm: false,
-        fund: false,
-        redemption: false,
-    },
 };

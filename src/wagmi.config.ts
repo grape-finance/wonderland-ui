@@ -6,7 +6,8 @@ import type { Chain } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
-const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? "YOUR_WALLETCONNECT_PROJECT_ID";
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? "";
+const hasWalletConnectProjectId = Boolean(projectId && projectId !== "YOUR_WALLETCONNECT_PROJECT_ID");
 
 export const pulsechain: Chain = {
     id: 369,
@@ -14,9 +15,11 @@ export const pulsechain: Chain = {
     network: "pulsechain",
     nativeCurrency: { name: "Pulse", symbol: "PLS", decimals: 18 },
     rpcUrls: {
-        default: "https://rpc-pulsechain.g4mm4.io",
-        public: "https://rpc-pulsechain.g4mm4.io",
-        webSocket: "wss://rpc-pulsechain.g4mm4.io",
+        default: {
+            http: ["https://rpc-pulsechain.g4mm4.io"],
+            webSocket: ["wss://rpc-pulsechain.g4mm4.io"],
+        },
+        public: { http: ["https://rpc-pulsechain.g4mm4.io"] },
     },
     blockExplorers: {
         default: {
@@ -24,22 +27,6 @@ export const pulsechain: Chain = {
             url: "https://scan.mypinata.cloud/ipfs/bafybeih3olry3is4e4lzm7rus5l3h6zrphcal5a7ayfkhzm5oivjro2cp4/#",
         },
     },
-};
-
-export const pulsechainTestnet: Chain = {
-    id: 943,
-    name: "PulseChain Testnet",
-    network: "pulsechain-testnet",
-    nativeCurrency: { name: "Test Pulse", symbol: "tPLS", decimals: 18 },
-    rpcUrls: {
-        default: "https://rpc-testnet-pulsechain.g4mm4.io",
-        public: "https://rpc-testnet-pulsechain.g4mm4.io",
-        webSocket: "wss://pulsechain-testnet-rpc.publicnode.com",
-    },
-    blockExplorers: {
-        default: { name: "PulseScan Testnet", url: "https://scan.v4.testnet.pulsechain.com" },
-    },
-    testnet: true,
 };
 
 const rabbyWallet = ({ chains }: { chains: Chain[] }): Wallet => ({
@@ -63,24 +50,26 @@ const rabbyWallet = ({ chains }: { chains: Chain[] }): Wallet => ({
 });
 
 export const { chains, provider } = configureChains(
-    [pulsechain, pulsechainTestnet],
+    [pulsechain],
     [
         jsonRpcProvider({
-            rpc: chain => ({ http: chain.rpcUrls.default as string }),
+            rpc: chain => ({ http: chain.rpcUrls.default.http[0] }),
         }),
     ],
 );
 
+const recommendedWallets: Wallet[] = [injectedWallet({ chains }), rabbyWallet({ chains }), coinbaseWallet({ chains, appName: "Pulsar Protocol" })];
+
+// WalletConnect (and MetaMask's mobile fallback) must not be initialized with
+// a placeholder ID: doing so opens a relay socket that can never authenticate.
+if (hasWalletConnectProjectId) {
+    recommendedWallets.splice(1, 0, metaMaskWallet({ chains, projectId }), walletConnectWallet({ chains, projectId }));
+}
+
 const connectors = connectorsForWallets([
     {
         groupName: "Recommended",
-        wallets: [
-            injectedWallet({ chains }),
-            metaMaskWallet({ chains, projectId }),
-            rabbyWallet({ chains }),
-            walletConnectWallet({ chains, projectId }),
-            coinbaseWallet({ chains, appName: "Pulsar Protocol" }),
-        ],
+        wallets: recommendedWallets,
     },
 ]);
 

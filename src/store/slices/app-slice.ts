@@ -1,17 +1,16 @@
 import { ethers } from "ethers";
-import { getAddresses, PULSAR_ANALYTICS_API } from "../../constants";
-import { StakingContract, MemoExchangeAbi, MemoTokenContract, TreasuryContract, StakingDistributorContract, TimeTokenContract } from "../../abi";
+import { getAddresses } from "../../constants";
+import { StakingContract, StakingDistributorContract, MemoExchangeAbi, MemoTokenContract, wMemoTokenContract } from "../../abi";
 import { setAll } from "../../helpers";
 import { createSlice, createSelector, createAsyncThunk } from "@reduxjs/toolkit";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { getMarketPrice, getTokenPrice } from "../../helpers";
+import { getMarketPrice } from "../../helpers";
 import { RootState } from "../store";
 import { Networks } from "../../constants/blockchain";
 import { error } from "../../store/slices/messages-slice";
 import { messages } from "../../constants/messages";
 import { getFundTotal } from "../../helpers/get-fund-total";
 import { IData } from "src/hooks/types";
-import axios from "axios";
 
 interface ILoadAppDetails {
     networkID: number;
@@ -28,115 +27,93 @@ export const loadAppDetails = createAsyncThunk("app/loadAppDetails", async ({ ne
         checkWrongNetwork();
     }
 
+    const { timePrice, wMemoPrice } = await getMarketPrice(networkID, provider);
     const currentBlock = await provider.getBlockNumber();
     const currentBlockTime = (await provider.getBlock(currentBlock)).timestamp;
 
-    // Testnet: read all metrics directly from on-chain contracts to avoid
-    // dependence on the external analytics API (which tracks mainnet only).
-    if (networkID === Networks.PULSE_TESTNET) {
-        const addresses = getAddresses(networkID);
-
-        const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
-        const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
-        const treasuryContract = new ethers.Contract(addresses.TREASURY_ADDRESS, TreasuryContract, provider);
-        const distributorContract = new ethers.Contract(addresses.DISTRIBUTOR_ADDRESS, StakingDistributorContract, provider);
-        const timeContract = new ethers.Contract(addresses.PULSAR_ADDRESS, TimeTokenContract, provider);
-
-        const [epoch, circ, currentIndex, totalReserves, totalSupply, nextReward, timeSupply] = await Promise.all([
-            stakingContract.epoch(),
-            memoContract.circulatingSupply(),
-            stakingContract.index(),
-            treasuryContract.totalReserves(),
-            memoContract.totalSupply(),
-            distributorContract.nextRewardFor(addresses.STAKING_ADDRESS),
-            timeContract.totalSupply(),
-        ]);
-
-        // Rebase rate = nextReward / PULSAR.totalSupply() — the protocol-level rate
-        // (Distributor mints nextReward based on PULSAR.totalSupply × rate/1e6).
-        // Dividing by PULSAR.totalSupply gives the designed 0.5%/rebase regardless of
-        // how much is currently staked. Dividing by circ (staked QUASAR) gives the
-        // per-staker rate, which is astronomical when few tokens are staked, leading
-        // to an unusable display.
-        const stakingRebase = timeSupply.gt(0) ? Number(nextReward) / Number(timeSupply) : 0;
-        const fiveDayRate = Math.pow(1 + stakingRebase, 5 * 3) - 1;
-        const stakingAPY = Math.pow(1 + stakingRebase, 365 * 3) - 1;
-
-        // PULSAR launch price on testnet = $1; QUASAR = index × PULSAR price
-        const timePrice = 1;
-        const indexFormatted = Number(ethers.utils.formatUnits(currentIndex, "gwei"));
-        const wMemoMarketPrice = indexFormatted * timePrice;
-
-        const circFormatted = Number(ethers.utils.formatUnits(circ, "gwei"));
-        const supplyFormatted = Number(ethers.utils.formatUnits(totalSupply, "gwei"));
-        // Treasury stores reserves as 9-decimal PULSAR-equivalent value
-        const treasuryBalance = Number(ethers.utils.formatUnits(totalReserves, 9));
-
-        return {
-            currentIndex: indexFormatted,
-            currentBlock,
-            currentBlockTime,
-            fiveDayRate,
-            treasuryBalance,
-            stakingAPY,
-            stakingTVL: circFormatted * timePrice,
-            stakingRebase,
-            nextRebase: epoch.endTime,
-            marketPrice: timePrice,
-            wMemoMarketPrice,
-            marketCap: supplyFormatted * timePrice,
-            rfvWmemo: 0,
-        };
-    }
-
-    // Mainnet: use the external analytics API plus on-chain reads.
-    const { wMemoPrice } = await getMarketPrice();
-    const { total, zapper } = await getFundTotal();
-    const { wmemo } = await (await axios.get(PULSAR_ANALYTICS_API)).data;
-
-    const rfvWmemo = total / Number(ethers.utils.formatEther(wmemo.circulation));
-    const marketCap = Number(ethers.utils.formatEther(wmemo.totalSupply)) * wMemoPrice;
-    const stakingTVL = Number(ethers.utils.formatEther(wmemo.circulation)) * wMemoPrice;
-
-    if (networkID !== Networks.PULSE) {
-        return { wMemoMarketPrice: wMemoPrice, treasuryBalance: total, currentBlock, currentBlockTime, zapper, marketCap, stakingTVL, rfvWmemo };
-    }
-
+    const { total, zapper } = await getFundTotal(networkID, provider);
     const addresses = getAddresses(networkID);
+
+    // wMEMO supply from on-chain.
+    // wMEMO is only minted when a user explicitly wraps MEMO:
+    //   TIME → stake → MEMO → wrap → wMEMO
+    // When no one has wrapped yet (totalSupply = 0) Market Cap, TVL and Backing
+    // per wMEMO would all show $0.  Fall back to the MEMO-equivalent wMEMO amount:
+    //   equivalent wMEMO = MEMO.circulatingSupply / stakingIndex
+    // This is algebraically identical to wMEMO × wMemoPrice once wrapping begins.
+    const wMemoContract = new ethers.Contract(addresses.WRAPPED_QUASAR_ADDRESS, wMemoTokenContract, provider);
+    const wMemoSupplyRaw = await wMemoContract.totalSupply();
+    let effectiveWMemoCirc = Number(ethers.utils.formatEther(wMemoSupplyRaw));
+
+    if (effectiveWMemoCirc === 0) {
+        const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
+        const stakingContractForIndex = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
+        const [memoCircRaw, currentIndexRaw] = await Promise.all([
+            memoContract.circulatingSupply(),
+            stakingContractForIndex.index(),
+        ]);
+        const memoCirc = Number(ethers.utils.formatUnits(memoCircRaw, 9));
+        const index = Number(ethers.utils.formatUnits(currentIndexRaw, "gwei"));
+        effectiveWMemoCirc = index > 0 ? memoCirc / index : 0;
+    }
+
+    const rfvWmemo = effectiveWMemoCirc > 0 ? total / effectiveWMemoCirc : 0;
+    const marketCap = effectiveWMemoCirc * wMemoPrice;
+    const stakingTVL = effectiveWMemoCirc * wMemoPrice;
+
+    
+    // if (networkID !== Networks.PULSE) {
+    //     return { wMemoMarketPrice: wMemoPrice, treasuryBalance: total, currentBlock, currentBlockTime, zapper, marketCap, stakingTVL, rfvWmemo };
+    // }
     const stakingContract = new ethers.Contract(addresses.STAKING_ADDRESS, StakingContract, provider);
     const memoContract = new ethers.Contract(addresses.QUASAR_ADDRESS, MemoTokenContract, provider);
 
     const epoch = await stakingContract.epoch();
-    const stakingReward = epoch.distribute;
-    const circ = await memoContract.circulatingSupply();
-    const stakingRebase = stakingReward / circ;
-    const fiveDayRate = Math.pow(1 + stakingRebase, 5 * 3) - 1;
-    const stakingAPY = Math.pow(1 + stakingRebase, 365 * 3) - 1;
+    const distributorContract = new ethers.Contract(addresses.DISTRIBUTOR_ADDRESS, StakingDistributorContract, provider);
+    const scheduledRewardRaw = await distributorContract.nextRewardFor(addresses.STAKING_ADDRESS);
 
+    // `epoch.distribute` is zero until the first rebase stages a reward for the
+    // following epoch. During that bootstrap window, use Distributor's live
+    // scheduled reward so the UI reports the protocol's projected yield rather
+    // than a misleading 0%.
+    const projectedRewardRaw = epoch.distribute.gt(0) ? epoch.distribute : scheduledRewardRaw;
+    const stakingReward = Number(ethers.utils.formatUnits(projectedRewardRaw, 9));
+    const circ = Number(ethers.utils.formatUnits(await memoContract.circulatingSupply(), 9));
+    const stakingRebase = circ > 0 ? stakingReward / circ : 0;
+    const fiveDayRate = Math.pow(1 + stakingRebase, 5 * 3) - 1;
+    const uncappedStakingAPY = Math.pow(1 + stakingRebase, 365 * 3) - 1;
+    const stakingAPYCapped = !Number.isFinite(uncappedStakingAPY) || uncappedStakingAPY > 10000000;
+    const stakingAPY = stakingAPYCapped ? 10000000 : uncappedStakingAPY;
+    
     const currentIndex = await stakingContract.index();
     const nextRebase = epoch.endTime;
+    
+    // const redemptionContract = new ethers.Contract(addresses.REDEMPTION_ADDRESS, MemoExchangeAbi, provider);
+    // const redemptionRateUsdc = await redemptionContract.USDC_EXCHANGERATE();
+    // console.log('redemptionRateUsdc', redemptionRateUsdc)
+    // const redemptionRateBsgg = await redemptionContract.BSGG_EXCHANGERATE();
+    // const redemptionDeadline = await redemptionContract.deadline();
 
-    const redemptionContract = new ethers.Contract(addresses.REDEMPTION_ADDRESS, MemoExchangeAbi, provider);
-    const redemptionRateUsdc = await redemptionContract.USDC_EXCHANGERATE();
-    const redemptionRateBsgg = await redemptionContract.BSGG_EXCHANGERATE();
-    const redemptionDeadline = await redemptionContract.deadline();
+    // console.log('redemptionDeadline', redemptionDeadline)
 
     return {
-        currentIndex: Number(ethers.utils.formatUnits(currentIndex, "gwei")) / 4.5,
+        currentIndex: Number(ethers.utils.formatUnits(currentIndex, "gwei")),
+        marketPrice: timePrice,
         marketCap,
         currentBlock,
         fiveDayRate,
         treasuryBalance: total,
         stakingAPY,
+        stakingAPYCapped,
         stakingTVL,
         stakingRebase,
         currentBlockTime,
         nextRebase,
         wMemoMarketPrice: wMemoPrice,
         rfvWmemo,
-        redemptionRateUsdc,
-        redemptionRateBsgg,
-        redemptionDeadline,
+        redemptionRateUsdc : 0,
+        redemptionRateBsgg : 0,
+        redemptionDeadline : 0,
         zapper,
     };
 });
@@ -168,6 +145,7 @@ export interface IAppSlice {
     fiveDayRate: number;
     treasuryBalance: number;
     stakingAPY: number;
+    stakingAPYCapped: boolean;
     stakingRebase: number;
     nextRebase: number;
     totalSupply: number;

@@ -21,7 +21,7 @@ export interface BondOpts {
      *  the token balance displayed in the UI. USDC = 6, everything else = 18. */
     readonly reserveDecimals?: number;
     /**
-     * Set to true for bonds that use EthBondDepository (e.g. WPLS / native-asset bonds).
+     * Legacy flag for bonds that use EthBondDepository (native-asset bonds).
      * EthBondDepository.bondPriceInUSD() = bondPrice() × assetPrice(oracle) × 1e6
      * so the correct USD display formula is  bondPriceRaw / 1e16  (not formatUnits(..., 18)).
      */

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Box, OutlinedInput, InputAdornment, Slide, FormControl } from "@mui/material";
 import { trim, prettifySeconds } from "../../helpers";
-import { changeApproval, bondAsset, calcBondDetails, calcBondV2Details } from "../../store/slices/bond-slice";
+import { changeApproval, bondAsset, calcBondDetails, calcBondV2Details, mintMockBondAsset } from "../../store/slices/bond-slice";
 import { useWeb3Context } from "../../hooks";
 import { IPendingTxn, isPendingTxn, txnButtonText } from "../../store/slices/pending-txns-slice";
 import { Skeleton } from "@mui/material";
@@ -29,6 +29,12 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
     // Minimum payout enforced by the contract: 0.01 PULSAR for v1, 0.0001 for v2
     const MIN_PAYOUT = bond.v2Bond ? 0.0001 : 0.01;
+    const isMockTokenDeployment = import.meta.env.VITE_USE_MOCK_TOKENS === "true";
+    const mockFaucetAmounts: Record<string, string> = {
+        usdc: "0.1",
+        wpls: "10000",
+        pdai: "100",
+    };
 
     const isBondLoading = useSelector<IReduxState, boolean>(state => state.bonding.loading ?? true);
     const [zapinOpen, setZapinOpen] = useState(false);
@@ -128,6 +134,13 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
         dispatch(changeApproval({ address, bond, provider, networkID: chainID }));
     };
 
+    const onGetTestTokens = async () => {
+        if (await checkWrongNetwork()) return;
+        const value = mockFaucetAmounts[bond.name];
+        if (!value) return;
+        dispatch(mintMockBondAsset({ address, bond, provider, networkID: chainID, value }));
+    };
+
     const handleZapinOpen = () => {
         dispatch(calcBondDetails({ bond, value: "0", provider, networkID: chainID }));
         setZapinOpen(true);
@@ -222,6 +235,20 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
                             Note: The "Approve" transaction is only needed when minting for the first time; subsequent minting only requires you to perform the "Mint"
                             transaction.
                         </p>
+                    </div>
+                )}
+
+                {isMockTokenDeployment && address && mockFaucetAmounts[bond.name] && (
+                    <div className="mock-faucet">
+                        <button
+                            type="button"
+                            className="mock-faucet-button"
+                            disabled={isPendingTxn(pendingTransactions, `faucet_${bond.name}`)}
+                            onClick={onGetTestTokens}
+                        >
+                            {txnButtonText(pendingTransactions, `faucet_${bond.name}`, `Get test ${bond.displayName}`)}
+                        </button>
+                        <p>Mock deployment only. Adds {mockFaucetAmounts[bond.name]} {bond.displayName} to the connected wallet.</p>
                     </div>
                 )}
             </Box>

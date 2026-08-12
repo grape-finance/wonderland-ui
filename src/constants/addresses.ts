@@ -5,17 +5,31 @@ interface IChainAddresses {
 }
 
 const PULSE_MAINNET: IChainAddresses = {
-    DAO_ADDRESS: "",
-    QUASAR_ADDRESS: "",
-    PULSAR_ADDRESS: "",
-    MIM_ADDRESS: "",
-    STAKING_ADDRESS: "",
-    STAKING_HELPER_ADDRESS: "",
-    PULSAR_BONDING_CALC_ADDRESS: "",
-    TREASURY_ADDRESS: "",
+    DAO_ADDRESS: import.meta.env.VITE_DAO_ADDRESS || "",
+    QUASAR_ADDRESS: import.meta.env.VITE_QUASAR_ADDRESS || "",
+    PULSAR_ADDRESS: import.meta.env.VITE_PULSAR_ADDRESS || "",
+    // Legacy UI field name; this is the selected real/mock USDC principal.
+    MIM_ADDRESS: import.meta.env.VITE_USDC_ADDRESS || "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
+    STAKING_ADDRESS: import.meta.env.VITE_STAKING_ADDRESS || "",
+    STAKING_HELPER_ADDRESS: import.meta.env.VITE_STAKING_HELPER_ADDRESS || "",
+    DISTRIBUTOR_ADDRESS: import.meta.env.VITE_DISTRIBUTOR_ADDRESS || "",
+    PULSAR_BONDING_CALC_ADDRESS: import.meta.env.VITE_BONDING_CALC_ADDRESS || "",
+    TREASURY_ADDRESS: import.meta.env.VITE_TREASURY_ADDRESS || "",
+    WRAPPED_QUASAR_ADDRESS: import.meta.env.VITE_WRAPPED_QUASAR_ADDRESS || "",
+    WPLS_ADDRESS: import.meta.env.VITE_WPLS_ADDRESS || "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+    PDAI_ADDRESS: import.meta.env.VITE_PDAI_ADDRESS || "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    LP_PAIR_PULSARPDAI: import.meta.env.VITE_PULSAR_PDAI_LP_ADDRESS || "",
+    LP_PAIR_TIMEUSDC: "",
+    LP_PAIR_TIMEWPLS: "",
+
+    // Live 8-decimal USD prices. Mock principals use these real-token price references.
+    AAVE_ORACLE_ADDRESS: import.meta.env.VITE_AAVE_ORACLE_ADDRESS || "0x0f907F1D586302AD04283f5739bA20f28fD7cBC6",
+    USDC_PRICE_ASSET_ADDRESS: import.meta.env.VITE_USDC_PRICE_ASSET_ADDRESS || "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
+    WPLS_PRICE_ASSET_ADDRESS: import.meta.env.VITE_WPLS_PRICE_ASSET_ADDRESS || "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+    PDAI_PRICE_ASSET_ADDRESS: import.meta.env.VITE_PDAI_PRICE_ASSET_ADDRESS || "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+
     ZAPIN_ADDRESS: "",
     ZAPIN_LP_ADDRESS: "",
-    WRAPPED_QUASAR_ADDRESS: "",
     ANYSWAP_ADDRESS: "",
     ANY_WRAPPED_QUASAR_ADDRESS: "",
     BSGG_MIM_LP: "",
@@ -23,33 +37,9 @@ const PULSE_MAINNET: IChainAddresses = {
     REDEMPTION_ADDRESS: "",
 };
 
-const PULSE_TESTNET: IChainAddresses = {
-    DAO_ADDRESS:              "0x4Aa6Da4ca5d76e8d5e3ACD11B92Ab22D564F1fcb",
-    PULSAR_ADDRESS:             "0xb0e21e5D5fceC4870332c7f0D0eB6641FaD16Ea1",
-    QUASAR_ADDRESS:             "0x50310D7224Bd0bA77fC26Ba4ee6cef7D4eEa90DB",
-    WRAPPED_QUASAR_ADDRESS:            "0xF40159d1699c15429Ad13360E87A8708ef1255D2",
-    // MockUSDC — deployed because testnet has no real USDC
-    MIM_ADDRESS:              "0x9131d71A23e0cdd8F0086ea525D1076B72a749eD",
-    STAKING_ADDRESS:          "0x4f80778d18fA51A4243728bBdD41017c3d3D65D2",
-    STAKING_HELPER_ADDRESS:   "0xD838985440dcE163724b12D478C2846DE6a64924",
-    DISTRIBUTOR_ADDRESS:      "0xD629612fed09BC583Ac22a0f57De49A89b953A59",
-    PULSAR_BONDING_CALC_ADDRESS:"0x7353db33986d710641Dac0DcD0c73C27ac8DE907",
-    TREASURY_ADDRESS:         "0xBda059C9a19C9bb2428c57c4C7744D17cB78884A",
-    // Not deployed on testnet
-    ZAPIN_ADDRESS:        "",
-    ZAPIN_LP_ADDRESS:     "",
-    ANYSWAP_ADDRESS:      "",
-    ANY_WRAPPED_QUASAR_ADDRESS:    "",
-    BSGG_MIM_LP:          "",
-    FARM_ADDRESS:         "",
-    REDEMPTION_ADDRESS:   "",
-};
-
 export const getAddresses = (networkID: number) => {
     if (networkID === Networks.PULSE) return PULSE_MAINNET;
-    if (networkID === Networks.PULSE_TESTNET) return PULSE_TESTNET;
-
-    throw Error("Network don't support");
+    throw Error("Network not supported");
 };
 
 export const ADRESSES_LIST = [
@@ -60,3 +50,4 @@ export const ADRESSES_LIST = [
 ];
 
 export const DEAD_ADDRESS = "0x000000000000000000000000000000000000dEaD";
+export const TOKEN_DECIMALS = 9;

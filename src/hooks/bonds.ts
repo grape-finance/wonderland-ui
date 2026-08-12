@@ -37,6 +37,8 @@ function useBonds() {
                 return bond;
             });
 
+
+
         const mostProfitableBonds = bondDetails
             .concat()
             .sort((a, b) => {

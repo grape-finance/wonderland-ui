@@ -9,6 +9,8 @@ function Root() {
 
     useEffect(() => {
         loadTokenPrices().then(() => setLoading(false));
+        const priceRefresh = window.setInterval(loadTokenPrices, 60_000);
+        return () => window.clearInterval(priceRefresh);
     }, []);
 
     if (loading) return <Loading />;

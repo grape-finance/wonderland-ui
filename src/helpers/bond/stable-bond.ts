@@ -33,7 +33,7 @@ export class StableBond extends Bond {
         if (this.tokensInStrategy) {
             tokenAmount = BigNumber.from(tokenAmount).add(BigNumber.from(this.tokensInStrategy)).toString();
         }
-        return tokenAmount / Math.pow(10, 18);
+        return Number(ethers.utils.formatUnits(tokenAmount, this.reserveDecimals));
     }
 }
 
