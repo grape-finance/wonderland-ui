@@ -10,6 +10,7 @@ import { IReduxState } from "../../store/slices/state.interface";
 import { IAllBondData } from "../../hooks/bonds";
 import useDebounce from "../../hooks/debounce";
 import { messages } from "../../constants/messages";
+import { IS_MOCK_TOKEN_DEPLOYMENT } from "../../constants";
 import { warning } from "../../store/slices/messages-slice";
 import Zapin from "./Zapin";
 interface IBondPurchaseProps {
@@ -29,7 +30,7 @@ function BondPurchase({ bond, slippage }: IBondPurchaseProps) {
 
     // Minimum payout enforced by the contract: 0.01 PULSAR for v1, 0.0001 for v2
     const MIN_PAYOUT = bond.v2Bond ? 0.0001 : 0.01;
-    const isMockTokenDeployment = import.meta.env.VITE_USE_MOCK_TOKENS === "true";
+    const isMockTokenDeployment = IS_MOCK_TOKEN_DEPLOYMENT;
     const mockFaucetAmounts: Record<string, string> = {
         usdc: "0.1",
         wpls: "10000",

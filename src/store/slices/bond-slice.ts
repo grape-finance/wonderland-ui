@@ -1,7 +1,7 @@
 import { ethers, constants } from "ethers";
 import { getMarketPrice, getProtocolAssetPrices, getTokenPrice, sleep, trim } from "../../helpers";
 import { calculateUserBondDetails, getBalances } from "./account-slice";
-import { getAddresses } from "../../constants";
+import { getAddresses, IS_MOCK_TOKEN_DEPLOYMENT } from "../../constants";
 import { fetchPendingTxns, clearPendingTxn } from "./pending-txns-slice";
 import { createSlice, createSelector, createAsyncThunk } from "@reduxjs/toolkit";
 import { JsonRpcProvider, StaticJsonRpcProvider } from "@ethersproject/providers";
@@ -35,13 +35,13 @@ interface IMintMockBondAsset {
 
 /**
  * Refill a wallet for rehearsals against a mock-token deployment.
- * The UI only exposes this action when VITE_USE_MOCK_TOKENS=true; production
+ * The UI only exposes this action for a configured mock-token deployment; production
  * reserve tokens do not implement this permissionless mint function.
  */
 export const mintMockBondAsset = createAsyncThunk(
     "bonding/mintMockBondAsset",
     async ({ bond, provider, networkID, address, value }: IMintMockBondAsset, { dispatch }) => {
-        if (!provider || !address || import.meta.env.VITE_USE_MOCK_TOKENS !== "true") {
+        if (!provider || !address || !IS_MOCK_TOKEN_DEPLOYMENT) {
             dispatch(warning({ text: messages.please_connect_wallet }));
             return;
         }

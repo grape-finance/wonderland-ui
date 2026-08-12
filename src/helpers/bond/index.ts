@@ -1,4 +1,5 @@
 import { Networks } from "../../constants/blockchain";
+import { getAddresses } from "../../constants/addresses";
 import { LPBond, CustomLPBond, NotTimeLpBond } from "./lp-bond";
 import { StableBond, CustomBond, StableV2Bond } from "./stable-bond";
 
@@ -188,11 +189,12 @@ export const wmemoMim = new NotTimeLpBond({
 
 // ─── PulseChain Mainnet bonds ────────────────────────────────────────────────
 
-const usdcMainnetBondAddress = import.meta.env.VITE_USDC_BOND_ADDRESS || "";
-const wplsMainnetBondAddress = import.meta.env.VITE_WPLS_BOND_ADDRESS || "";
-const usdcMainnetTokenAddress = import.meta.env.VITE_USDC_ADDRESS || "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07";
-const wplsMainnetTokenAddress = import.meta.env.VITE_WPLS_ADDRESS || "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
-const pdaiMainnetTokenAddress = import.meta.env.VITE_PDAI_ADDRESS || "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+const pulseMainnetAddresses = getAddresses(Networks.PULSE);
+const usdcMainnetBondAddress = pulseMainnetAddresses.USDC_BOND_ADDRESS;
+const wplsMainnetBondAddress = pulseMainnetAddresses.WPLS_BOND_ADDRESS;
+const usdcMainnetTokenAddress = pulseMainnetAddresses.MIM_ADDRESS;
+const wplsMainnetTokenAddress = pulseMainnetAddresses.WPLS_ADDRESS;
+const pdaiMainnetTokenAddress = pulseMainnetAddresses.PDAI_ADDRESS;
 
 export const usdcBond = new StableBond({
     name: "usdc",
@@ -239,7 +241,7 @@ export const wplsBond = new CustomBond({
 });
 
 // pDAI is volatile; Treasury converts each deposit through AaveOracleFetch.
-const pdaiMainnetBondAddress = import.meta.env.VITE_PDAI_BOND_ADDRESS || "";
+const pdaiMainnetBondAddress = pulseMainnetAddresses.PDAI_BOND_ADDRESS;
 
 export const pdaiBond = new CustomBond({
     name: "pdai",
