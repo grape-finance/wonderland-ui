@@ -86,7 +86,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactElement }> = ({ chil
 
     const checkWrongNetwork = useCallback(async (): Promise<boolean> => {
         if (!walletChainId || !AVAILABLE_CHAINS.includes(walletChainId)) {
-            const shouldSwitch = window.confirm(messages.switch_to_avalanche);
+            const shouldSwitch = window.confirm(messages.switch_to_pulse);
             if (shouldSwitch) {
                 wagmiSwitchNetwork?.(DEFAULD_NETWORK);
             }
